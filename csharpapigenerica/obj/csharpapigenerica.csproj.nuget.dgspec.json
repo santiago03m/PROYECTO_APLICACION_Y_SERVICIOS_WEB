@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\santiago\\Desktop\\PROYECTO_APLICACION_Y_SERVICIOS_WEB\\csharpapigenerica\\csharpapigenerica.csproj": {}
+    "C:\\Users\\David\\Desktop\\cosas\\trabajos u\\Servicios web\\PROYECTO_APLICACION_Y_SERVICIOS_WEB\\csharpapigenerica\\csharpapigenerica.csproj": {}
   },
   "projects": {
-    "C:\\Users\\santiago\\Desktop\\PROYECTO_APLICACION_Y_SERVICIOS_WEB\\csharpapigenerica\\csharpapigenerica.csproj": {
+    "C:\\Users\\David\\Desktop\\cosas\\trabajos u\\Servicios web\\PROYECTO_APLICACION_Y_SERVICIOS_WEB\\csharpapigenerica\\csharpapigenerica.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\santiago\\Desktop\\PROYECTO_APLICACION_Y_SERVICIOS_WEB\\csharpapigenerica\\csharpapigenerica.csproj",
+        "projectUniqueName": "C:\\Users\\David\\Desktop\\cosas\\trabajos u\\Servicios web\\PROYECTO_APLICACION_Y_SERVICIOS_WEB\\csharpapigenerica\\csharpapigenerica.csproj",
         "projectName": "csharpapigenerica",
-        "projectPath": "C:\\Users\\santiago\\Desktop\\PROYECTO_APLICACION_Y_SERVICIOS_WEB\\csharpapigenerica\\csharpapigenerica.csproj",
-        "packagesPath": "C:\\Users\\santiago\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\santiago\\Desktop\\PROYECTO_APLICACION_Y_SERVICIOS_WEB\\csharpapigenerica\\obj\\",
+        "projectPath": "C:\\Users\\David\\Desktop\\cosas\\trabajos u\\Servicios web\\PROYECTO_APLICACION_Y_SERVICIOS_WEB\\csharpapigenerica\\csharpapigenerica.csproj",
+        "packagesPath": "C:\\Users\\David\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\David\\Desktop\\cosas\\trabajos u\\Servicios web\\PROYECTO_APLICACION_Y_SERVICIOS_WEB\\csharpapigenerica\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\santiago\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\David\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -44,7 +44,7 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "9.0.200"
+        "SdkAnalysisLevel": "9.0.100"
       },
       "frameworks": {
         "net9.0": {
@@ -74,7 +74,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.201/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.101/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
