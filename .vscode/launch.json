@@ -1,0 +1,27 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      
+      {
+        "name": "Iniciar API en depuración",
+        "type": "coreclr",
+        "request": "launch",
+        "preLaunchTask": "build",
+        "program": "C:\\Users\\santiago\\Desktop\\PROYECTO_APLICACION_Y_SERVICIOS_WEB\\csharpapigenerica\\bin\\Debug\\net9.0\\csharpapigenerica.dll",
+        "args": [],
+        "cwd": "${workspaceFolder}",
+        "stopAtEntry": false,
+        "serverReadyAction": {
+          "action": "openExternally",
+          "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+        },
+        "env": {
+          "ASPNETCORE_ENVIRONMENT": "Development"
+        },
+        "sourceFileMap": {
+          "/Users": "${workspaceFolder}"
+        }
+      }
+    ]
+  }
+  

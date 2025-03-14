@@ -31,3 +31,4 @@ C:\Users\santiago\Desktop\PROYECTO_APLICACION_Y_SERVICIOS_WEB\csharpapigenerica\
 C:\Users\santiago\Desktop\PROYECTO_APLICACION_Y_SERVICIOS_WEB\csharpapigenerica\obj\Debug\net9.0\csharpapigenerica.pdb
 C:\Users\santiago\Desktop\PROYECTO_APLICACION_Y_SERVICIOS_WEB\csharpapigenerica\obj\Debug\net9.0\csharpapigenerica.genruntimeconfig.cache
 C:\Users\santiago\Desktop\PROYECTO_APLICACION_Y_SERVICIOS_WEB\csharpapigenerica\obj\Debug\net9.0\ref\csharpapigenerica.dll
+C:\Users\santiago\Desktop\PROYECTO_APLICACION_Y_SERVICIOS_WEB\csharpapigenerica\obj\Debug\net9.0\csharpapigenerica.sourcelink.json
