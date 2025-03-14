@@ -33,7 +33,7 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "Api Genérica C#", 
+        Title = "Api Genérica C#",
         Version = "v1",
         Description = "API de prueba con ASP.NET Core y Swagger",
         Contact = new OpenApiContact
