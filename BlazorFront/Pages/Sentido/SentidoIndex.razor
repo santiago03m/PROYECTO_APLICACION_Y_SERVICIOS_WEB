@@ -1,0 +1,155 @@
+﻿@page "/Sentido"
+
+<h3 class="text-center mt-4">Gestión de Sentidos</h3>
+<div class="d-flex justify-content-end mb-3">
+    <button class="btn btn-primary" @onclick="MostrarFormulario">
+        <i class="fas fa-plus"></i> Agregar Sentido
+    </button>
+</div>
+
+@if (mostrarAlerta)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @mensajeAlerta
+        <button type="button" class="btn-close" @onclick="() => mostrarAlerta = false"></button>
+    </div>
+}
+
+@if (sentidos is null)
+{
+    <div class="text-center">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p>Cargando sentidos...</p>
+    </div>
+}
+else if (!sentidos.Any())
+{
+    <div class="alert alert-info text-center">No hay sentidos disponibles.</div>
+}
+else
+{
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>Nombre</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var (s, index) in sentidos.Select((s, i) => (s, i + 1)))
+            {
+                <tr>
+                    <td>@index</td>
+                    <td>@s.Nombre</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm me-2" @onclick="() => EditarSentido(s)">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
+                        <button class="btn btn-danger btn-sm" @onclick="() => EliminarSentido(s.Id)">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@if (mostrarFormulario)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(sentido.Id == 0 ? "Agregar Sentido" : "Editar Sentido")</h5>
+                    <button type="button" class="btn-close" @onclick="Cancelar"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="sentido" OnValidSubmit="GuardarSentido">
+                        <div class="mb-3">
+                            <label class="form-label">Nombre:</label>
+                            <InputText class="form-control" @bind-Value="sentido.Nombre" required />
+                        </div>
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-success me-2">
+                                <i class="fas fa-save"></i> Guardar
+                            </button>
+                            <button type="button" class="btn btn-secondary" @onclick="Cancelar">
+                                <i class="fas fa-times"></i> Cancelar
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<Sentido> sentidos = new();
+    private Sentido sentido = new();
+    private bool mostrarFormulario = false;
+    private string? mensajeAlerta;
+    private bool mostrarAlerta = false;
+
+    [Inject] private IRepository Repository { get; set; } = null!;
+    [Inject] private NavigationManager NavigationManager { get; set; } = null!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var url = "api/Sentido";
+        sentidos = await Repository.GetAsync<List<Sentido>>(url);
+    }
+
+    private void MostrarFormulario()
+    {
+        sentido = new Sentido();
+        mostrarFormulario = true;
+    }
+
+    private void EditarSentido(Sentido s)
+    {
+        sentido = new Sentido
+            {
+                Id = s.Id,
+                Nombre = s.Nombre
+            };
+        mostrarFormulario = true;
+    }
+
+    private async Task GuardarSentido()
+    {
+        var url1 = "api/Sentido";
+        var url2 = $"api/Sentido/{sentido.Id}";
+
+        if (sentido.Id == 0)
+        {
+            await Repository.PostAsync(url1, sentido);
+        }
+        else
+        {
+            await Repository.PutAsync(url2, sentido);
+        }
+        sentidos = await Repository.GetAsync<List<Sentido>>(url1);
+        mostrarFormulario = false;
+        mensajeAlerta = "Sentido guardado correctamente";
+        mostrarAlerta = true;
+    }
+
+    private async Task EliminarSentido(int id)
+    {
+        var url1 = "api/Sentido";
+        var url2 = $"api/Sentido/{id}";
+
+        await Repository.DeleteAsync(url2);
+        sentidos = await Repository.GetAsync<List<Sentido>>(url1);
+        mensajeAlerta = "Sentido eliminado correctamente";
+        mostrarAlerta = true;
+    }
+
+    private void Cancelar()
+    {
+        mostrarFormulario = false;
+    }
+}

@@ -1,0 +1,148 @@
+﻿@page "/Frecuencia"
+
+<h3 class="text-center mt-4">Gestión de Frecuencia</h3>
+<div class="d-flex justify-content-end mb-3">
+    <button class="btn btn-primary" @onclick="MostrarFormulario">
+        <i class="fas fa-plus"></i> Agregar Frecuencia
+    </button>
+</div>
+
+@if (mostrarAlerta)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @mensajeAlerta
+        <button type="button" class="btn-close" @onclick="() => mostrarAlerta = false"></button>
+    </div>
+}
+
+@if (frecuencias is null)
+{
+    <div class="text-center">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p>Cargando frecuencias...</p>
+    </div>
+}
+else if (!frecuencias.Any())
+{
+    <div class="alert alert-info text-center">No hay frecuencias disponibles.</div>
+}
+else
+{
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>Nombre</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var (f, index) in frecuencias.Select((f, i) => (f, i + 1)))
+            {
+                <tr>
+                    <td>@index</td>
+                    <td>@f.Nombre</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm me-2" @onclick="() => EditarFrecuencia(f)">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
+                        <button class="btn btn-danger btn-sm" @onclick="() => EliminarFrecuencia(f.Id)">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@if (mostrarFormulario)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(frecuencia.Id == 0 ? "Agregar Frecuencia" : "Editar Frecuencia")</h5>
+                    <button type="button" class="btn-close" @onclick="Cancelar"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="frecuencia" OnValidSubmit="GuardarFrecuencia">
+                        <div class="mb-3">
+                            <label class="form-label">Nombre:</label>
+                            <InputText class="form-control" @bind-Value="frecuencia.Nombre" required />
+                        </div>
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-success me-2">
+                                <i class="fas fa-save"></i> Guardar
+                            </button>
+                            <button type="button" class="btn btn-secondary" @onclick="Cancelar">
+                                <i class="fas fa-times"></i> Cancelar
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<Frecuencia> frecuencias = new();
+    private Frecuencia frecuencia = new();
+    private bool mostrarFormulario = false;
+    private string? mensajeAlerta;
+    private bool mostrarAlerta = false;
+
+    [Inject] private IRepository Repository { get; set; } = null!;
+    [Inject] private NavigationManager NavigationManager { get; set; } = null!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var url = "api/Frecuencia";
+        frecuencias = await Repository.GetAsync<List<Frecuencia>>(url);
+    }
+
+    private void MostrarFormulario()
+    {
+        frecuencia = new Frecuencia();
+        mostrarFormulario = true;
+    }
+
+    private void EditarFrecuencia(Frecuencia f)
+    {
+        frecuencia = new Frecuencia { Id = f.Id, Nombre = f.Nombre };
+        mostrarFormulario = true;
+    }
+
+    private async Task GuardarFrecuencia()
+    {
+        var url1 = "api/Frecuencia";
+        var url2 = $"api/Frecuencia/{frecuencia.Id}";
+
+        if (frecuencia.Id == 0)
+            await Repository.PostAsync(url1, frecuencia);
+        else
+            await Repository.PutAsync(url2, frecuencia);
+
+        frecuencias = await Repository.GetAsync<List<Frecuencia>>(url1);
+        mostrarFormulario = false;
+        mensajeAlerta = "Frecuencia guardada correctamente";
+        mostrarAlerta = true;
+    }
+
+    private async Task EliminarFrecuencia(int id)
+    {
+        var url1 = "api/Frecuencia";
+        var url2 = $"api/Frecuencia/{id}";
+
+        await Repository.DeleteAsync(url2);
+        frecuencias = await Repository.GetAsync<List<Frecuencia>>(url1);
+        mensajeAlerta = "Frecuencia eliminada correctamente";
+        mostrarAlerta = true;
+    }
+
+    private void Cancelar()
+    {
+        mostrarFormulario = false;
+    }
+}

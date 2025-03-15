@@ -1,0 +1,157 @@
+﻿@page "/UnidadMedicion"
+
+<h3 class="text-center mt-4">Gestión de Unidad de Medición</h3>
+
+<div class="d-flex justify-content-end mb-3">
+    <button class="btn btn-primary" @onclick="MostrarFormulario">
+        <i class="fas fa-plus"></i> Agregar Unidad de Medición
+    </button>
+</div>
+
+@if (mostrarAlerta)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @mensajeAlerta
+        <button type="button" class="btn-close" @onclick="() => mostrarAlerta = false"></button>
+    </div>
+}
+
+@if (unidadesMedicion is null)
+{
+    <div class="text-center">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p>Cargando unidades de medición...</p>
+    </div>
+}
+else if (!unidadesMedicion.Any())
+{
+    <div class="alert alert-info text-center">No hay unidades de medición disponibles.</div>
+}
+else
+{
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>Descripción</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var (u, index) in unidadesMedicion.Select((u, i) => (u, i + 1)))
+            {
+                <tr>
+                    <td>@index</td>
+                    <td>@u.Descripcion</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm me-2" @onclick="() => EditarUnidadMedicion(u)">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
+                        <button class="btn btn-danger btn-sm" @onclick="() => EliminarUnidadMedicion(u.Id)">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@if (mostrarFormulario)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(unidadMedicion.Id == 0 ? "Agregar Unidad de Medición" : "Editar Unidad de Medición")</h5>
+                    <button type="button" class="btn-close" @onclick="Cancelar"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="unidadMedicion" OnValidSubmit="GuardarUnidadMedicion">
+                        <div class="mb-3">
+                            <label class="form-label">Descripción:</label>
+                            <InputText class="form-control" @bind-Value="unidadMedicion.Descripcion" required />
+                        </div>
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-success me-2">
+                                <i class="fas fa-save"></i> Guardar
+                            </button>
+                            <button type="button" class="btn btn-secondary" @onclick="Cancelar">
+                                <i class="fas fa-times"></i> Cancelar
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<UnidadMedicion> unidadesMedicion = new();
+    private UnidadMedicion unidadMedicion = new();
+    private bool mostrarFormulario = false;
+    private string? mensajeAlerta;
+    private bool mostrarAlerta = false;
+
+    [Inject] private IRepository Repository { get; set; } = null!;
+    [Inject] private NavigationManager NavigationManager { get; set; } = null!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var url = "api/UnidadMedicion";
+        unidadesMedicion = await Repository.GetAsync<List<UnidadMedicion>>(url);
+    }
+
+    private void MostrarFormulario()
+    {
+        unidadMedicion = new UnidadMedicion();
+        mostrarFormulario = true;
+    }
+
+    private void EditarUnidadMedicion(UnidadMedicion unidad)
+    {
+        unidadMedicion = new UnidadMedicion
+            {
+                Id = unidad.Id,
+                Descripcion = unidad.Descripcion
+            };
+        mostrarFormulario = true;
+    }
+
+    private async Task GuardarUnidadMedicion()
+    {
+        var url1 = "api/UnidadMedicion";
+        var url2 = $"api/UnidadMedicion/{unidadMedicion.Id}";
+
+        if (unidadMedicion.Id == 0)
+        {
+            await Repository.PostAsync<UnidadMedicion>(url1, unidadMedicion);
+        }
+        else
+        {
+            await Repository.PutAsync<UnidadMedicion>(url2, unidadMedicion);
+        }
+
+        unidadesMedicion = await Repository.GetAsync<List<UnidadMedicion>>(url1);
+        mostrarFormulario = false;
+        mensajeAlerta = "Unidad de Medición guardada correctamente";
+        mostrarAlerta = true;
+    }
+
+    private async Task EliminarUnidadMedicion(int id)
+    {
+        var url1 = "api/UnidadMedicion";
+        var url2 = $"api/UnidadMedicion/{id}";
+
+        await Repository.DeleteAsync(url2);
+        unidadesMedicion = await Repository.GetAsync<List<UnidadMedicion>>(url1);
+        mensajeAlerta = "Unidad de Medición eliminada correctamente";
+        mostrarAlerta = true;
+    }
+
+    private void Cancelar()
+    {
+        mostrarFormulario = false;
+    }
+}

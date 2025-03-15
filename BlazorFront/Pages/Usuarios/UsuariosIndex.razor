@@ -1,0 +1,160 @@
+﻿@page "/Usuarios"
+
+<h3 class="text-center mt-4">Gestión de Usuarios</h3>
+<div class="d-flex justify-content-end mb-3">
+    <button class="btn btn-primary" @onclick="MostrarFormulario">
+        <i class="fas fa-plus"></i> Agregar Usuario
+    </button>
+</div>
+
+@if (mostrarAlerta)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @mensajeAlerta
+        <button type="button" class="btn-close" @onclick="() => mostrarAlerta = false"></button>
+    </div>
+}
+
+@if (usuarios is null)
+{
+    <div class="text-center">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p>Cargando usuarios...</p>
+    </div>
+}
+else if (!usuarios.Any())
+{
+    <div class="alert alert-info text-center">No hay usuarios disponibles.</div>
+}
+else
+{
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>Email</th>
+                <th>Contraseña</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var (u, index) in usuarios.Select((u, i) => (u, i + 1)))
+            {
+                <tr>
+                    <td>@index</td>
+                    <td>@u.Email</td>
+                    <td>@u.Contrasena</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm me-2" @onclick="() => EditarUsuario(u)">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
+                        <button class="btn btn-danger btn-sm" @onclick="() => EliminarUsuario(u.Email)">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@if (mostrarFormulario)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(string.IsNullOrEmpty(usuario.Email) ? "Agregar Usuario" : "Editar Usuario")</h5>
+                    <button type="button" class="btn-close" @onclick="Cancelar"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="usuario" OnValidSubmit="GuardarUsuario">
+                        <div class="mb-3">
+                            <label class="form-label">Email:</label>
+                            <InputText class="form-control" @bind-Value="usuario.Email" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Contraseña:</label>
+                            <InputText class="form-control" type="password" @bind-Value="usuario.Contrasena" required />
+                        </div>
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-success me-2">
+                                <i class="fas fa-save"></i> Guardar
+                            </button>
+                            <button type="button" class="btn btn-secondary" @onclick="Cancelar">
+                                <i class="fas fa-times"></i> Cancelar
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+@code {
+    private List<Usuario> usuarios = new();
+    private Usuario usuario = new();
+    private bool mostrarFormulario = false;
+    private string? mensajeAlerta;
+    private bool mostrarAlerta = false;
+
+    [Inject] private IRepository Repository { get; set; } = null!;
+    [Inject] private NavigationManager NavigationManager { get; set; } = null!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var url = "api/Usuarios";
+        usuarios = await Repository.GetAsync<List<Usuario>>(url);
+    }
+
+    private void MostrarFormulario()
+    {
+        usuario = new Usuario();
+        mostrarFormulario = true;
+    }
+
+    private void EditarUsuario(Usuario usuario)
+    {
+        usuario = new Usuario
+            {
+                Contrasena = usuario.Contrasena,
+                Email = usuario.Email
+            };
+        mostrarFormulario = true;
+    }
+
+    private async Task GuardarUsuario()
+    {
+        var url1 = "api/Usuarios";
+        var url2 = $"api/Usuarios/{usuario.Email}";
+
+        if (string.IsNullOrEmpty(usuario.Email))
+        {
+            var response = await Repository.PostAsync<Usuario>(url1, usuario);
+        }
+        else
+        {
+            var response = await Repository.PutAsync<Usuario>(url2, usuario);
+        }
+        usuarios = await Repository.GetAsync<List<Usuario>>(url1);
+        mostrarFormulario = false;
+        mensajeAlerta = "Usuario guardado correctamente";
+        mostrarAlerta = true;
+    }
+
+    private async Task EliminarUsuario(string email)
+    {
+        var url1 = "api/Usuarios";
+        var url2 = $"api/Usuarios/{usuario.Email}";
+        
+        await Repository.DeleteAsync(url2);
+        usuarios = await Repository.GetAsync<List<Usuario>>(url1);
+        mensajeAlerta = "Usuario eliminado correctamente";
+        mostrarAlerta = true;
+    }
+
+    private void Cancelar()
+    {
+        mostrarFormulario = false;
+    }
+}

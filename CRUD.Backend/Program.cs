@@ -16,6 +16,15 @@ namespace CRUD.Backend
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
             builder.Services.AddSwaggerGen();
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowSpecificOrigins", policy =>
+                {
+                    policy.WithOrigins("http://localhost:7250")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+                });
+            });
             builder.Services.AddDbContext<DataContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer")));
             var app = builder.Build();
@@ -29,6 +38,8 @@ namespace CRUD.Backend
             }
 
             app.UseHttpsRedirection();
+
+            app.UseCors("AllowSpecificOrigins");
 
             app.UseAuthorization();
 
