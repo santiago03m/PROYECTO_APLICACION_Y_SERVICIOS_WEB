@@ -1,0 +1,196 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\santiago\\Desktop\\PROYECTO_APLICACION_Y_SERVICIOS_WEB\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{8B518A9A-CE38-3378-AA8E-3B418AFC3783}|..\\..\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\FrontBlazor.csproj|c:\\users\\santiago\\downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\frontblazor\\pages\\frecuencias.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8B518A9A-CE38-3378-AA8E-3B418AFC3783}|..\\..\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\FrontBlazor.csproj|c:\\users\\santiago\\downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\frontblazor\\pages\\crudproductos.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8B518A9A-CE38-3378-AA8E-3B418AFC3783}|..\\..\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\FrontBlazor.csproj|c:\\users\\santiago\\downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\frontblazor\\layout\\navmenu.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8B518A9A-CE38-3378-AA8E-3B418AFC3783}|..\\..\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\FrontBlazor.csproj|c:\\users\\santiago\\downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\frontblazor\\layout\\mainlayout.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8B518A9A-CE38-3378-AA8E-3B418AFC3783}|..\\..\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\FrontBlazor.csproj|c:\\users\\santiago\\downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\frontblazor\\pages\\home.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8B518A9A-CE38-3378-AA8E-3B418AFC3783}|..\\..\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\FrontBlazor.csproj|c:\\users\\santiago\\downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\frontblazor\\pages\\weather.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8B518A9A-CE38-3378-AA8E-3B418AFC3783}|..\\..\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\FrontBlazor.csproj|c:\\users\\santiago\\downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\frontblazor\\app.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8B518A9A-CE38-3378-AA8E-3B418AFC3783}|..\\..\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\FrontBlazor.csproj|c:\\users\\santiago\\downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\frontblazor\\pages\\counter.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8B518A9A-CE38-3378-AA8E-3B418AFC3783}|..\\..\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\FrontBlazor.csproj|c:\\users\\santiago\\downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\frontblazor\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8B518A9A-CE38-3378-AA8E-3B418AFC3783}|..\\..\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\FrontBlazor.csproj|c:\\users\\santiago\\downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\frontblazor\\properties\\launchsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 4,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{40ea2e6b-2121-4bb8-a43e-c83c04b51041}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Frecuencias.razor",
+              "DocumentMoniker": "C:\\Users\\santiago\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\Pages\\Frecuencias.razor",
+              "RelativeDocumentMoniker": "..\\..\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\Pages\\Frecuencias.razor",
+              "ToolTip": "C:\\Users\\santiago\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\Pages\\Frecuencias.razor",
+              "RelativeToolTip": "..\\..\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\Pages\\Frecuencias.razor",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACkAAAAUAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-03-15T03:33:31.272Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "NavMenu.razor",
+              "DocumentMoniker": "C:\\Users\\santiago\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\Layout\\NavMenu.razor",
+              "RelativeDocumentMoniker": "..\\..\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\Layout\\NavMenu.razor",
+              "ToolTip": "C:\\Users\\santiago\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\Layout\\NavMenu.razor",
+              "RelativeToolTip": "..\\..\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\Layout\\NavMenu.razor",
+              "ViewState": "AgIAADIAAAAAAAAAAAAcwEIAAAA1AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-03-15T03:28:34.25Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "MainLayout.razor",
+              "DocumentMoniker": "C:\\Users\\santiago\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\Layout\\MainLayout.razor",
+              "RelativeDocumentMoniker": "..\\..\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\Layout\\MainLayout.razor",
+              "ToolTip": "C:\\Users\\santiago\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\Layout\\MainLayout.razor",
+              "RelativeToolTip": "..\\..\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\Layout\\MainLayout.razor",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-03-15T03:28:18.665Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "Weather.razor",
+              "DocumentMoniker": "C:\\Users\\santiago\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\Pages\\Weather.razor",
+              "RelativeDocumentMoniker": "..\\..\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\Pages\\Weather.razor",
+              "ToolTip": "C:\\Users\\santiago\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\Pages\\Weather.razor",
+              "RelativeToolTip": "..\\..\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\Pages\\Weather.razor",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-03-15T03:26:50.686Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "App.razor",
+              "DocumentMoniker": "C:\\Users\\santiago\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\App.razor",
+              "RelativeDocumentMoniker": "..\\..\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\App.razor",
+              "ToolTip": "C:\\Users\\santiago\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\App.razor",
+              "RelativeToolTip": "..\\..\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\App.razor",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-03-15T03:26:41.862Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "CrudProductos.razor",
+              "DocumentMoniker": "C:\\Users\\santiago\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\Pages\\CrudProductos.razor",
+              "RelativeDocumentMoniker": "..\\..\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\Pages\\CrudProductos.razor",
+              "ToolTip": "C:\\Users\\santiago\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\Pages\\CrudProductos.razor",
+              "RelativeToolTip": "..\\..\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\Pages\\CrudProductos.razor",
+              "ViewState": "AgIAABIAAAAAAAAAAAAAABQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-03-15T03:26:34.822Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Counter.razor",
+              "DocumentMoniker": "C:\\Users\\santiago\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\Pages\\Counter.razor",
+              "RelativeDocumentMoniker": "..\\..\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\Pages\\Counter.razor",
+              "ToolTip": "C:\\Users\\santiago\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\Pages\\Counter.razor",
+              "RelativeToolTip": "..\\..\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\Pages\\Counter.razor",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-03-15T03:26:27.558Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Home.razor",
+              "DocumentMoniker": "C:\\Users\\santiago\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\Pages\\Home.razor",
+              "RelativeDocumentMoniker": "..\\..\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\Pages\\Home.razor",
+              "ToolTip": "C:\\Users\\santiago\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\Pages\\Home.razor",
+              "RelativeToolTip": "..\\..\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\Pages\\Home.razor",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-03-15T03:26:18.366Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\santiago\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\Program.cs",
+              "RelativeDocumentMoniker": "..\\..\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\Program.cs",
+              "ToolTip": "C:\\Users\\santiago\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\Program.cs",
+              "RelativeToolTip": "..\\..\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\Program.cs",
+              "ViewState": "AgIAAA8AAAAAAAAAAAAAABgAAAA4AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-03-15T03:20:34.371Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "launchSettings.json",
+              "DocumentMoniker": "C:\\Users\\santiago\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\Properties\\launchSettings.json",
+              "RelativeDocumentMoniker": "..\\..\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\Properties\\launchSettings.json",
+              "ToolTip": "C:\\Users\\santiago\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\Properties\\launchSettings.json",
+              "RelativeToolTip": "..\\..\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\Properties\\launchSettings.json",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAAB0AAAAHAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-03-15T03:19:23.095Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

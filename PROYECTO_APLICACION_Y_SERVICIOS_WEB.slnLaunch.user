@@ -1,0 +1,15 @@
+[
+  {
+    "Name": "Nuevo perfil",
+    "Projects": [
+      {
+        "Path": "csharpapigenerica\\csharpapigenerica.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "..\\..\\Downloads\\proyectos_08_08_2025\\proyectos_08_08_2025\\FrontBlazor\\FrontBlazor.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]
