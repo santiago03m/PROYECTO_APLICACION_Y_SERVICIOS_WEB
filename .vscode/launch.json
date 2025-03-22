@@ -11,6 +11,7 @@
       "name": "Backend",
       "type": "coreclr",
       "request": "launch",
+      "preLaunchTask": "build-backend",
       "program": "${workspaceFolder}/CRUD.Backend/bin/Debug/net9.0/CRUD.Backend.dll",
       "cwd": "${workspaceFolder}/CRUD.Backend",
       "stopAtEntry": false
