@@ -20,7 +20,8 @@ namespace CRUD.Backend
             {
                 options.AddPolicy("AllowSpecificOrigins", policy =>
                 {
-                    policy.WithOrigins("http://localhost:7250")
+                    policy.WithOrigins("http://localhost:7250", "https://localhost:7250",
+                                       "http://localhost:5174", "https://localhost:7123")
                         .AllowAnyHeader()
                         .AllowAnyMethod();
                 });

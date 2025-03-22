@@ -1,0 +1,33 @@
+{
+  "version": "0.2.0",
+  "compounds": [
+    {
+      "name": "Run Backend and Frontend",
+      "configurations": ["Backend", "Frontend"]
+    }
+  ],
+  "configurations": [
+    {
+      "name": "Backend",
+      "type": "coreclr",
+      "request": "launch",
+      "program": "${workspaceFolder}/CRUD.Backend/bin/Debug/net9.0/CRUD.Backend.dll",
+      "cwd": "${workspaceFolder}/CRUD.Backend",
+      "stopAtEntry": false
+    },
+    {
+      "name": "Frontend",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-frontend",
+      "program": "dotnet",
+      "args": [
+        "run",
+        "--project",
+        "${workspaceFolder}/BlazorFront/BlazorFront.csproj"
+      ],
+      "cwd": "${workspaceFolder}/BlazorFront",
+      "stopAtEntry": false
+    }
+  ]
+}

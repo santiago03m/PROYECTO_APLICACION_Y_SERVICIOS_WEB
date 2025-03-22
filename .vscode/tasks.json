@@ -1,0 +1,19 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build-backend",
+      "command": "dotnet",
+      "type": "process",
+      "args": ["build", "${workspaceFolder}/CRUD.Backend/CRUD.Backend.csproj"],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build-frontend",
+      "command": "dotnet",
+      "type": "process",
+      "args": ["build", "${workspaceFolder}/BlazorFront/BlazorFront.csproj"],
+      "problemMatcher": "$msCompile"
+    }
+  ]
+}
