@@ -19,5 +19,11 @@ namespace CRUD.Backend.Data
         public DbSet<Rol> Rol { get; set; }
         public DbSet<Fuente> Fuente { get; set; }
         public DbSet<RepresentacionVisual> RepresenVisual { get; set; }
+        public DbSet<Actor> Actor { get; set; }
+        public DbSet<Articulo> Articulo { get; set; }
+        public DbSet<Literal> Literal { get; set; }
+        public DbSet<Numeral> Numeral { get; set; }
+        public DbSet<Paragrafo> Paragrafo { get; set; }   
+        public DbSet<Variable> Variable { get; set; }     
     }
 }
