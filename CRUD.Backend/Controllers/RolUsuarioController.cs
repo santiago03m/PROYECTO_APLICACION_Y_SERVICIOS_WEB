@@ -58,15 +58,16 @@ namespace CRUD.Backend.Controllers
         {
             if (email != rolUsuario.FkEmail || idRol != rolUsuario.FkIdRol)
             {
-                return BadRequest();
+                return BadRequest("Los parámetros de URL no coinciden con los datos del cuerpo de la solicitud.");
             }
 
-            var existente = await _context.RolUsuario.FindAsync(email, idRol);
+            var existente = await _context.RolUsuario.FirstOrDefaultAsync(r => r.FkEmail == email && r.FkIdRol == idRol);
             if (existente == null)
             {
-                return NotFound();
+                return NotFound("No se encontró el registro que se desea actualizar.");
             }
 
+            // Actualiza los valores
             _context.Entry(existente).CurrentValues.SetValues(rolUsuario);
 
             try
@@ -83,6 +84,7 @@ namespace CRUD.Backend.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
+
 
         [HttpDelete("{email}/{idRol}")]
         public async Task<ActionResult> DeleteAsync(string email, int idRol)

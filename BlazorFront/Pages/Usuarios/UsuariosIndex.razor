@@ -64,7 +64,8 @@ else
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">@(string.IsNullOrEmpty(usuario.Email) ? "Agregar Usuario" : "Editar Usuario")</h5>
+                    <h5 class="modal-title">@(string.IsNullOrEmpty(usuario.Email) ? "Agregar Usuario" : "Editar Usuario")
+                    </h5>
                     <button type="button" class="btn-close" @onclick="Cancelar"></button>
                 </div>
                 <div class="modal-body">
@@ -98,6 +99,8 @@ else
     private string? mensajeAlerta;
     private bool mostrarAlerta = false;
 
+    private bool esEditar = false;
+
     [Inject] private IRepository Repository { get; set; } = null!;
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
 
@@ -110,43 +113,49 @@ else
     private void MostrarFormulario()
     {
         usuario = new Usuario();
+        esEditar = false;
         mostrarFormulario = true;
     }
 
-    private void EditarUsuario(Usuario usuario)
+
+    private void EditarUsuario(Usuario u)
     {
         usuario = new Usuario
-            {
-                Contrasena = usuario.Contrasena,
-                Email = usuario.Email
-            };
+        {
+            Contrasena = u.Contrasena,
+            Email = u.Email
+        };
+        esEditar = true;
         mostrarFormulario = true;
     }
+
 
     private async Task GuardarUsuario()
     {
         var url1 = "api/Usuarios";
-        var url2 = $"api/Usuarios/{usuario.Email}";
+        var url2 = $"api/Usuarios/{Uri.EscapeDataString(usuario.Email)}";
 
-        if (string.IsNullOrEmpty(usuario.Email))
-        {
-            var response = await Repository.PostAsync<Usuario>(url1, usuario);
-        }
-        else
+        if (esEditar)
         {
             var response = await Repository.PutAsync<Usuario>(url2, usuario);
         }
+        else
+        {
+            var response = await Repository.PostAsync<Usuario>(url1, usuario);
+        }
+
         usuarios = await Repository.GetAsync<List<Usuario>>(url1);
         mostrarFormulario = false;
         mensajeAlerta = "Usuario guardado correctamente";
         mostrarAlerta = true;
     }
 
+
     private async Task EliminarUsuario(string email)
     {
         var url1 = "api/Usuarios";
         var url2 = $"api/Usuarios/{usuario.Email}";
-        
+
         await Repository.DeleteAsync(url2);
         usuarios = await Repository.GetAsync<List<Usuario>>(url1);
         mensajeAlerta = "Usuario eliminado correctamente";

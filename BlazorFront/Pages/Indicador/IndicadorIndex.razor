@@ -105,24 +105,52 @@ else
                             <InputText class="form-control" @bind-Value="indicador.Nombre" required />
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Meta:</label>
-                            <InputTextArea class="form-control" @bind-Value="indicador.Meta" required />
+                            <label class="form-label">Objetivo:</label>
+                            <InputTextArea class="form-control" @bind-Value="indicador.Objetivo" />
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">ID Tipo Indicador:</label>
+                            <label class="form-label">Alcance:</label>
+                            <InputTextArea class="form-control" @bind-Value="indicador.Alcance" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Fórmula:</label>
+                            <InputTextArea class="form-control" @bind-Value="indicador.Formula" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Tipo Indicador (ID):</label>
                             <InputNumber class="form-control" @bind-Value="indicador.FkIdTipoIndicador" />
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">ID Unidad Medición:</label>
+                            <label class="form-label">Unidad Medición (ID):</label>
                             <InputNumber class="form-control" @bind-Value="indicador.FkIdUnidadMedicion" />
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">ID Sentido:</label>
+                            <label class="form-label">Meta:</label>
+                            <InputText class="form-control" @bind-Value="indicador.Meta" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Sentido (ID):</label>
                             <InputNumber class="form-control" @bind-Value="indicador.FkIdSentido" />
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">ID Frecuencia:</label>
+                            <label class="form-label">Frecuencia (ID):</label>
                             <InputNumber class="form-control" @bind-Value="indicador.FkIdFrecuencia" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Artículo (FK):</label>
+                            <InputText class="form-control" @bind-Value="indicador.FkIdArticulo" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Literal (FK):</label>
+                            <InputText class="form-control" @bind-Value="indicador.FkIdLiteral" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Numeral (FK):</label>
+                            <InputText class="form-control" @bind-Value="indicador.FkIdNumeral" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Parágrafo (FK):</label>
+                            <InputText class="form-control" @bind-Value="indicador.FkIdParagrafo" />
                         </div>
                         <div class="d-flex justify-content-end">
                             <button type="submit" class="btn btn-success me-2">
@@ -133,6 +161,7 @@ else
                             </button>
                         </div>
                     </EditForm>
+
                 </div>
             </div>
         </div>

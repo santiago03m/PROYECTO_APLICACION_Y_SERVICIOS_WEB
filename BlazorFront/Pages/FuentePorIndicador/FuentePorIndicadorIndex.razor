@@ -130,7 +130,7 @@ else
     private async Task GuardarRelacion()
     {
         var url = "api/FuentePorIndicador";
-        var compositeKey = $"{relacion.FkIdFuente},{relacion.FkIdIndicador}";
+        var compositeKey = $"{relacion.FkIdFuente}/{relacion.FkIdIndicador}";
         var urlPut = $"api/FuentePorIndicador/{compositeKey}";
 
         if (esNuevo)
@@ -146,7 +146,7 @@ else
 
     private async Task EliminarRelacion(int fuenteId, int indicadorId)
     {
-        var url = $"api/FuentePorIndicador/{fuenteId},{indicadorId}";
+        var url = $"api/FuentePorIndicador/{fuenteId}/{indicadorId}";
         await Repository.DeleteAsync(url);
 
         fuentesPorIndicador = await Repository.GetAsync<List<FuentePorIndicador>>("api/FuentePorIndicador");

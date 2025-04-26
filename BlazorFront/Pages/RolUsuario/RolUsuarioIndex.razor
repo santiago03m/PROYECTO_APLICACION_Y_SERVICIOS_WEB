@@ -124,26 +124,40 @@ else
         mostrarFormulario = true;
     }
 
-    private async Task GuardarRolUsuario()
+   private async Task GuardarRolUsuario()
+{
+    var url1 = "api/RolUsuario";
+    var url2 = $"api/RolUsuario/{Uri.EscapeDataString(rolUsuario.FkEmail)}/{rolUsuario.FkIdRol}";
+
+    if (string.IsNullOrEmpty(rolUsuario.FkEmail) || rolUsuario.FkIdRol == 0)
+        return;
+
+    var existe = rolesUsuarios.Any(ru => ru.FkEmail == rolUsuario.FkEmail && ru.FkIdRol == rolUsuario.FkIdRol);
+
+    try
     {
-        var url1 = "api/RolUsuario";
-        var url2 = $"api/RolUsuario/{rolUsuario.FkEmail}/{rolUsuario.FkIdRol}";
-
-        if (string.IsNullOrEmpty(rolUsuario.FkEmail))
-            return;
-
-        var existe = rolesUsuarios.Any(ru => ru.FkEmail == rolUsuario.FkEmail && ru.FkIdRol == rolUsuario.FkIdRol);
-
         if (!existe)
+        {
             await Repository.PostAsync(url1, rolUsuario);
+            mensajeAlerta = "Rol de usuario creado correctamente";
+        }
         else
+        {
             await Repository.PutAsync(url2, rolUsuario);
+            mensajeAlerta = "Rol de usuario actualizado correctamente";
+        }
 
         rolesUsuarios = await Repository.GetAsync<List<RolUsuario>>(url1);
         mostrarFormulario = false;
-        mensajeAlerta = "Rol de usuario guardado correctamente";
         mostrarAlerta = true;
     }
+    catch (Exception ex)
+    {
+        mensajeAlerta = "Hubo un error al guardar el rol de usuario.";
+        mostrarAlerta = true;
+        Console.WriteLine($"Error guardando rol usuario: {ex.Message}");
+    }
+}
 
     private async Task EliminarRolUsuario(string email, int idRol)
     {
