@@ -1,9 +1,9 @@
-﻿@page "/Usuarios"
+@page "/Numeral"
 
-<h3 class="text-center mt-4">Gestión de Usuarios</h3>
+<h3 class="text-center mt-4">Gestión de Numerales</h3>
 <div class="d-flex justify-content-end mb-3">
     <button class="btn btn-primary" @onclick="MostrarFormulario">
-        <i class="fas fa-plus"></i> Agregar Usuario
+        <i class="fas fa-plus"></i> Agregar Numeral
     </button>
 </div>
 
@@ -15,16 +15,16 @@
     </div>
 }
 
-@if (usuarios is null)
+@if (numerales is null)
 {
     <div class="text-center">
         <div class="spinner-border text-primary" role="status"></div>
-        <p>Cargando usuarios...</p>
+        <p>Cargando numerales...</p>
     </div>
 }
-else if (!usuarios.Any())
+else if (!numerales.Any())
 {
-    <div class="alert alert-info text-center">No hay usuarios disponibles.</div>
+    <div class="alert alert-info text-center">No hay numerales disponibles.</div>
 }
 else
 {
@@ -32,23 +32,23 @@ else
         <thead class="table-dark">
             <tr>
                 <th>#</th>
-                <th>Email</th>
-                <th>Contraseña</th>
+                <th>Descripción</th>
+                <th>ID Literal</th>
                 <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var (u, index) in usuarios.Select((u, i) => (u, i + 1)))
+            @foreach (var (n, index) in numerales.Select((n, i) => (n, i + 1)))
             {
                 <tr>
                     <td>@index</td>
-                    <td>@u.Email</td>
-                    <td>@u.Contrasena</td>
+                    <td>@n.Descripcion</td>
+                    <td>@n.FkIdLiteral</td>
                     <td>
-                        <button class="btn btn-warning btn-sm me-2" @onclick="() => EditarUsuario(u)">
+                        <button class="btn btn-warning btn-sm me-2" @onclick="() => EditarNumeral(n)">
                             <i class="fas fa-edit"></i> Editar
                         </button>
-                        <button class="btn btn-danger btn-sm" @onclick="() => EliminarUsuario(u.Email)">
+                        <button class="btn btn-danger btn-sm" @onclick="() => EliminarNumeral(n.Id)">
                             <i class="fas fa-trash"></i> Eliminar
                         </button>
                     </td>
@@ -64,19 +64,22 @@ else
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">@(string.IsNullOrEmpty(usuario.Email) ? "Agregar Usuario" : "Editar Usuario")
-                    </h5>
+                    <h5 class="modal-title">@(string.IsNullOrEmpty(numeral.Id) ? "Agregar Numeral" : "Editar Numeral")</h5>
                     <button type="button" class="btn-close" @onclick="Cancelar"></button>
                 </div>
                 <div class="modal-body">
-                    <EditForm Model="usuario" OnValidSubmit="GuardarUsuario">
+                    <EditForm Model="numeral" OnValidSubmit="GuardarNumeral">
                         <div class="mb-3">
-                            <label class="form-label">Email:</label>
-                            <InputText class="form-control" @bind-Value="usuario.Email" required />
+                            <label class="form-label">ID:</label>
+                            <InputText class="form-control" @bind-Value="numeral.Id" required />
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Contraseña:</label>
-                            <InputText class="form-control" type="password" @bind-Value="usuario.Contrasena" required />
+                            <label class="form-label">Descripción:</label>
+                            <InputTextArea class="form-control" @bind-Value="numeral.Descripcion" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">ID Literal:</label>
+                            <InputText class="form-control" @bind-Value="numeral.FkIdLiteral" required />
                         </div>
                         <div class="d-flex justify-content-end">
                             <button type="submit" class="btn btn-success me-2">
@@ -92,73 +95,68 @@ else
         </div>
     </div>
 }
+
 @code {
-    private List<Usuario> usuarios = new();
-    private Usuario usuario = new();
+    private List<Numeral> numerales = new();
+    private Numeral numeral = new();
     private bool mostrarFormulario = false;
     private string? mensajeAlerta;
     private bool mostrarAlerta = false;
-
-    private bool esEditar = false;
 
     [Inject] private IRepository Repository { get; set; } = null!;
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
 
     protected override async Task OnInitializedAsync()
     {
-        var url = "api/Usuarios";
-        usuarios = await Repository.GetAsync<List<Usuario>>(url);
+        numerales = await Repository.GetAsync<List<Numeral>>("api/Numeral");
     }
 
     private void MostrarFormulario()
     {
-        usuario = new Usuario();
-        esEditar = false;
+        numeral = new Numeral();
         mostrarFormulario = true;
     }
 
-
-    private void EditarUsuario(Usuario u)
+    private void EditarNumeral(Numeral n)
     {
-        usuario = new Usuario
+        numeral = new Numeral
         {
-            Contrasena = u.Contrasena,
-            Email = u.Email
+            Id = n.Id,
+            Descripcion = n.Descripcion,
+            FkIdLiteral = n.FkIdLiteral
         };
-        esEditar = true;
         mostrarFormulario = true;
     }
 
-
-    private async Task GuardarUsuario()
+    private async Task GuardarNumeral()
     {
-        var url1 = "api/Usuarios";
-        var url2 = $"api/Usuarios/{Uri.EscapeDataString(usuario.Email)}";
+        var url = "api/Numeral";
+        var urlWithId = $"api/Numeral/{numeral.Id}";
 
-        if (esEditar)
-        {
-            var response = await Repository.PutAsync<Usuario>(url2, usuario);
-        }
+        if (string.IsNullOrEmpty(numeral.Id))
+            return;
+
+        var existe = numerales.Any(n => n.Id == numeral.Id);
+
+        if (!existe)
+            await Repository.PostAsync(url, numeral);
         else
-        {
-            var response = await Repository.PostAsync<Usuario>(url1, usuario);
-        }
+            await Repository.PutAsync(urlWithId, numeral);
 
-        usuarios = await Repository.GetAsync<List<Usuario>>(url1);
+        numerales = await Repository.GetAsync<List<Numeral>>(url);
         mostrarFormulario = false;
-        mensajeAlerta = "Usuario guardado correctamente";
+        mensajeAlerta = "Numeral guardado correctamente";
         mostrarAlerta = true;
     }
 
-
-    private async Task EliminarUsuario(string email)
+    private async Task EliminarNumeral(string id)
     {
-        var url1 = "api/Usuarios";
-        var url2 = $"api/Usuarios/{usuario.Email}";
+        var url = "api/Numeral";
+        var urlWithId = $"api/Numeral/{id}";
 
-        await Repository.DeleteAsync(url2);
-        usuarios = await Repository.GetAsync<List<Usuario>>(url1);
-        mensajeAlerta = "Usuario eliminado correctamente";
+        await Repository.DeleteAsync(urlWithId);
+        numerales = await Repository.GetAsync<List<Numeral>>(url);
+        mensajeAlerta = "Numeral eliminado correctamente";
         mostrarAlerta = true;
     }
 

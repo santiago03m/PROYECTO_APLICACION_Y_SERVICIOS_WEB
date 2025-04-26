@@ -1,9 +1,9 @@
-﻿@page "/Usuarios"
+@page "/Paragrafo"
 
-<h3 class="text-center mt-4">Gestión de Usuarios</h3>
+<h3 class="text-center mt-4">Gestión de Párrafo</h3>
 <div class="d-flex justify-content-end mb-3">
     <button class="btn btn-primary" @onclick="MostrarFormulario">
-        <i class="fas fa-plus"></i> Agregar Usuario
+        <i class="fas fa-plus"></i> Agregar Párrafo
     </button>
 </div>
 
@@ -15,16 +15,16 @@
     </div>
 }
 
-@if (usuarios is null)
+@if (parrafos is null)
 {
     <div class="text-center">
         <div class="spinner-border text-primary" role="status"></div>
-        <p>Cargando usuarios...</p>
+        <p>Cargando párrafos...</p>
     </div>
 }
-else if (!usuarios.Any())
+else if (!parrafos.Any())
 {
-    <div class="alert alert-info text-center">No hay usuarios disponibles.</div>
+    <div class="alert alert-info text-center">No hay párrafos disponibles.</div>
 }
 else
 {
@@ -32,23 +32,23 @@ else
         <thead class="table-dark">
             <tr>
                 <th>#</th>
-                <th>Email</th>
-                <th>Contraseña</th>
+                <th>Descripción</th>
+                <th>ID Artículo</th>
                 <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var (u, index) in usuarios.Select((u, i) => (u, i + 1)))
+            @foreach (var (p, index) in parrafos.Select((p, i) => (p, i + 1)))
             {
                 <tr>
                     <td>@index</td>
-                    <td>@u.Email</td>
-                    <td>@u.Contrasena</td>
+                    <td>@p.Descripcion</td>
+                    <td>@p.FkIdArticulo</td>
                     <td>
-                        <button class="btn btn-warning btn-sm me-2" @onclick="() => EditarUsuario(u)">
+                        <button class="btn btn-warning btn-sm me-2" @onclick="() => EditarParagrafo(p)">
                             <i class="fas fa-edit"></i> Editar
                         </button>
-                        <button class="btn btn-danger btn-sm" @onclick="() => EliminarUsuario(u.Email)">
+                        <button class="btn btn-danger btn-sm" @onclick="() => EliminarParagrafo(p.Id)">
                             <i class="fas fa-trash"></i> Eliminar
                         </button>
                     </td>
@@ -64,19 +64,22 @@ else
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">@(string.IsNullOrEmpty(usuario.Email) ? "Agregar Usuario" : "Editar Usuario")
-                    </h5>
+                    <h5 class="modal-title">@(string.IsNullOrEmpty(parrafo.Id) ? "Agregar Párrafo" : "Editar Párrafo")</h5>
                     <button type="button" class="btn-close" @onclick="Cancelar"></button>
                 </div>
                 <div class="modal-body">
-                    <EditForm Model="usuario" OnValidSubmit="GuardarUsuario">
+                    <EditForm Model="parrafo" OnValidSubmit="GuardarParrafo">
                         <div class="mb-3">
-                            <label class="form-label">Email:</label>
-                            <InputText class="form-control" @bind-Value="usuario.Email" required />
+                            <label class="form-label">ID:</label>
+                            <InputText class="form-control" @bind-Value="parrafo.Id" required />
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Contraseña:</label>
-                            <InputText class="form-control" type="password" @bind-Value="usuario.Contrasena" required />
+                            <label class="form-label">Descripción:</label>
+                            <InputTextArea class="form-control" @bind-Value="parrafo.Descripcion" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">ID Artículo:</label>
+                            <InputText class="form-control" @bind-Value="parrafo.FkIdArticulo" required />
                         </div>
                         <div class="d-flex justify-content-end">
                             <button type="submit" class="btn btn-success me-2">
@@ -92,73 +95,69 @@ else
         </div>
     </div>
 }
+
 @code {
-    private List<Usuario> usuarios = new();
-    private Usuario usuario = new();
+    private List<Paragrafo> parrafos = new();
+    private Paragrafo parrafo = new();
     private bool mostrarFormulario = false;
     private string? mensajeAlerta;
     private bool mostrarAlerta = false;
-
-    private bool esEditar = false;
 
     [Inject] private IRepository Repository { get; set; } = null!;
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
 
     protected override async Task OnInitializedAsync()
     {
-        var url = "api/Usuarios";
-        usuarios = await Repository.GetAsync<List<Usuario>>(url);
+        var url = "api/Paragrafo";
+        parrafos = await Repository.GetAsync<List<Paragrafo>>(url);
     }
 
     private void MostrarFormulario()
     {
-        usuario = new Usuario();
-        esEditar = false;
+        parrafo = new Paragrafo();
         mostrarFormulario = true;
     }
 
-
-    private void EditarUsuario(Usuario u)
+    private void EditarParagrafo(Paragrafo p)
     {
-        usuario = new Usuario
+        parrafo = new Paragrafo
         {
-            Contrasena = u.Contrasena,
-            Email = u.Email
+            Id = p.Id,
+            Descripcion = p.Descripcion,
+            FkIdArticulo = p.FkIdArticulo
         };
-        esEditar = true;
         mostrarFormulario = true;
     }
 
-
-    private async Task GuardarUsuario()
+    private async Task GuardarParrafo()
     {
-        var url1 = "api/Usuarios";
-        var url2 = $"api/Usuarios/{Uri.EscapeDataString(usuario.Email)}";
+        var url1 = "api/Paragrafo";
+        var url2 = $"api/Paragrafo/{parrafo.Id}";
 
-        if (esEditar)
-        {
-            var response = await Repository.PutAsync<Usuario>(url2, usuario);
-        }
+        if (string.IsNullOrEmpty(parrafo.Id))
+            return;
+
+        var existe = parrafos.Any(p => p.Id == parrafo.Id);
+
+        if (!existe)
+            await Repository.PostAsync(url1, parrafo);
         else
-        {
-            var response = await Repository.PostAsync<Usuario>(url1, usuario);
-        }
+            await Repository.PutAsync(url2, parrafo);
 
-        usuarios = await Repository.GetAsync<List<Usuario>>(url1);
+        parrafos = await Repository.GetAsync<List<Paragrafo>>(url1);
         mostrarFormulario = false;
-        mensajeAlerta = "Usuario guardado correctamente";
+        mensajeAlerta = "Párrafo guardado correctamente";
         mostrarAlerta = true;
     }
 
-
-    private async Task EliminarUsuario(string email)
+    private async Task EliminarParagrafo(string id)
     {
-        var url1 = "api/Usuarios";
-        var url2 = $"api/Usuarios/{usuario.Email}";
+        var url1 = "api/Paragrafo";
+        var url2 = $"api/Paragrafo/{id}";
 
         await Repository.DeleteAsync(url2);
-        usuarios = await Repository.GetAsync<List<Usuario>>(url1);
-        mensajeAlerta = "Usuario eliminado correctamente";
+        parrafos = await Repository.GetAsync<List<Paragrafo>>(url1);
+        mensajeAlerta = "Párrafo eliminado correctamente";
         mostrarAlerta = true;
     }
 

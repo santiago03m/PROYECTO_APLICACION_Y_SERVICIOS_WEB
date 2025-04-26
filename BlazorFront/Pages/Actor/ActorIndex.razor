@@ -1,9 +1,9 @@
-﻿@page "/Usuarios"
+@page "/Actor"
 
-<h3 class="text-center mt-4">Gestión de Usuarios</h3>
+<h3 class="text-center mt-4">Gestión de Actor</h3>
 <div class="d-flex justify-content-end mb-3">
     <button class="btn btn-primary" @onclick="MostrarFormulario">
-        <i class="fas fa-plus"></i> Agregar Usuario
+        <i class="fas fa-plus"></i> Agregar Actor
     </button>
 </div>
 
@@ -15,16 +15,16 @@
     </div>
 }
 
-@if (usuarios is null)
+@if (actores is null)
 {
     <div class="text-center">
         <div class="spinner-border text-primary" role="status"></div>
-        <p>Cargando usuarios...</p>
+        <p>Cargando actores...</p>
     </div>
 }
-else if (!usuarios.Any())
+else if (!actores.Any())
 {
-    <div class="alert alert-info text-center">No hay usuarios disponibles.</div>
+    <div class="alert alert-info text-center">No hay actores disponibles.</div>
 }
 else
 {
@@ -32,23 +32,23 @@ else
         <thead class="table-dark">
             <tr>
                 <th>#</th>
-                <th>Email</th>
-                <th>Contraseña</th>
+                <th>Nombre</th>
+                <th>ID Tipo Actor</th>
                 <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var (u, index) in usuarios.Select((u, i) => (u, i + 1)))
+            @foreach (var (a, index) in actores.Select((a, i) => (a, i + 1)))
             {
                 <tr>
                     <td>@index</td>
-                    <td>@u.Email</td>
-                    <td>@u.Contrasena</td>
+                    <td>@a.Nombre</td>
+                    <td>@a.FkIdTipoActor</td>
                     <td>
-                        <button class="btn btn-warning btn-sm me-2" @onclick="() => EditarUsuario(u)">
+                        <button class="btn btn-warning btn-sm me-2" @onclick="() => EditarActor(a)">
                             <i class="fas fa-edit"></i> Editar
                         </button>
-                        <button class="btn btn-danger btn-sm" @onclick="() => EliminarUsuario(u.Email)">
+                        <button class="btn btn-danger btn-sm" @onclick="() => EliminarActor(a.Id)">
                             <i class="fas fa-trash"></i> Eliminar
                         </button>
                     </td>
@@ -64,19 +64,22 @@ else
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">@(string.IsNullOrEmpty(usuario.Email) ? "Agregar Usuario" : "Editar Usuario")
-                    </h5>
+                    <h5 class="modal-title">@(string.IsNullOrEmpty(actor.Id) ? "Agregar Actor" : "Editar Actor")</h5>
                     <button type="button" class="btn-close" @onclick="Cancelar"></button>
                 </div>
                 <div class="modal-body">
-                    <EditForm Model="usuario" OnValidSubmit="GuardarUsuario">
+                    <EditForm Model="actor" OnValidSubmit="GuardarActor">
                         <div class="mb-3">
-                            <label class="form-label">Email:</label>
-                            <InputText class="form-control" @bind-Value="usuario.Email" required />
+                            <label class="form-label">ID:</label>
+                            <InputText class="form-control" @bind-Value="actor.Id" required />
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Contraseña:</label>
-                            <InputText class="form-control" type="password" @bind-Value="usuario.Contrasena" required />
+                            <label class="form-label">Nombre:</label>
+                            <InputText class="form-control" @bind-Value="actor.Nombre" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">ID Tipo Actor:</label>
+                            <InputNumber class="form-control" @bind-Value="actor.FkIdTipoActor" required />
                         </div>
                         <div class="d-flex justify-content-end">
                             <button type="submit" class="btn btn-success me-2">
@@ -92,73 +95,69 @@ else
         </div>
     </div>
 }
+
 @code {
-    private List<Usuario> usuarios = new();
-    private Usuario usuario = new();
+    private List<Actor> actores = new();
+    private Actor actor = new();
     private bool mostrarFormulario = false;
     private string? mensajeAlerta;
     private bool mostrarAlerta = false;
-
-    private bool esEditar = false;
 
     [Inject] private IRepository Repository { get; set; } = null!;
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
 
     protected override async Task OnInitializedAsync()
     {
-        var url = "api/Usuarios";
-        usuarios = await Repository.GetAsync<List<Usuario>>(url);
+        var url = "api/Actor";
+        actores = await Repository.GetAsync<List<Actor>>(url);
     }
 
     private void MostrarFormulario()
     {
-        usuario = new Usuario();
-        esEditar = false;
+        actor = new Actor();
         mostrarFormulario = true;
     }
 
-
-    private void EditarUsuario(Usuario u)
+    private void EditarActor(Actor a)
     {
-        usuario = new Usuario
+        actor = new Actor
         {
-            Contrasena = u.Contrasena,
-            Email = u.Email
+            Id = a.Id,
+            Nombre = a.Nombre,
+            FkIdTipoActor = a.FkIdTipoActor
         };
-        esEditar = true;
         mostrarFormulario = true;
     }
 
-
-    private async Task GuardarUsuario()
+    private async Task GuardarActor()
     {
-        var url1 = "api/Usuarios";
-        var url2 = $"api/Usuarios/{Uri.EscapeDataString(usuario.Email)}";
+        var url1 = "api/Actor";
+        var url2 = $"api/Actor/{actor.Id}";
 
-        if (esEditar)
-        {
-            var response = await Repository.PutAsync<Usuario>(url2, usuario);
-        }
+        if (string.IsNullOrEmpty(actor.Id))
+            return;
+
+        var existe = actores.Any(a => a.Id == actor.Id);
+
+        if (!existe)
+            await Repository.PostAsync(url1, actor);
         else
-        {
-            var response = await Repository.PostAsync<Usuario>(url1, usuario);
-        }
+            await Repository.PutAsync(url2, actor);
 
-        usuarios = await Repository.GetAsync<List<Usuario>>(url1);
+        actores = await Repository.GetAsync<List<Actor>>(url1);
         mostrarFormulario = false;
-        mensajeAlerta = "Usuario guardado correctamente";
+        mensajeAlerta = "Actor guardado correctamente";
         mostrarAlerta = true;
     }
 
-
-    private async Task EliminarUsuario(string email)
+    private async Task EliminarActor(string id)
     {
-        var url1 = "api/Usuarios";
-        var url2 = $"api/Usuarios/{usuario.Email}";
+        var url1 = "api/Actor";
+        var url2 = $"api/Actor/{id}";
 
         await Repository.DeleteAsync(url2);
-        usuarios = await Repository.GetAsync<List<Usuario>>(url1);
-        mensajeAlerta = "Usuario eliminado correctamente";
+        actores = await Repository.GetAsync<List<Actor>>(url1);
+        mensajeAlerta = "Actor eliminado correctamente";
         mostrarAlerta = true;
     }
 

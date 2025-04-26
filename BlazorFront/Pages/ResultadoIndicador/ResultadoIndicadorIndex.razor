@@ -1,0 +1,175 @@
+@page "/ResultadoIndicador"
+
+<h3 class="text-center mt-4">Gestión de Resultado Indicador</h3>
+<div class="d-flex justify-content-end mb-3">
+    <button class="btn btn-primary" @onclick="MostrarFormulario">
+        <i class="fas fa-plus"></i> Agregar Resultado Indicador
+    </button>
+</div>
+
+@if (mostrarAlerta)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @mensajeAlerta
+        <button type="button" class="btn-close" @onclick="() => mostrarAlerta = false"></button>
+    </div>
+}
+
+@if (resultadoIndicadores is null)
+{
+    <div class="text-center">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p>Cargando resultados de indicadores...</p>
+    </div>
+}
+else if (!resultadoIndicadores.Any())
+{
+    <div class="alert alert-info text-center">No hay resultados de indicadores disponibles.</div>
+}
+else
+{
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>Resultado</th>
+                <th>Fecha de Cálculo</th>
+                <th>ID Indicador</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var (r, index) in resultadoIndicadores.Select((r, i) => (r, i + 1)))
+            {
+                <tr>
+                    <td>@index</td>
+                    <td>@r.Resultado</td>
+                    <td>@r.FechaCalculo.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@r.FkIdIndicador</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm me-2" @onclick="() => EditarResultadoIndicador(r)">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
+                        <button class="btn btn-danger btn-sm" @onclick="() => EliminarResultadoIndicador(r.Id)">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@if (mostrarFormulario)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(string.IsNullOrEmpty(resultadoIndicador.Id.ToString()) ? "Agregar Resultado Indicador" : "Editar Resultado Indicador")</h5>
+                    <button type="button" class="btn-close" @onclick="Cancelar"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="resultadoIndicador" OnValidSubmit="GuardarResultadoIndicador">
+                        <div class="mb-3">
+                            <label class="form-label">ID:</label>
+                            <InputNumber class="form-control" @bind-Value="resultadoIndicador.Id" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Resultado:</label>
+                            <InputNumber class="form-control" @bind-Value="resultadoIndicador.Resultado" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Fecha de Cálculo:</label>
+                            <InputDate class="form-control" @bind-Value="resultadoIndicador.FechaCalculo" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">ID Indicador:</label>
+                            <InputNumber class="form-control" @bind-Value="resultadoIndicador.FkIdIndicador" required />
+                        </div>
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-success me-2">
+                                <i class="fas fa-save"></i> Guardar
+                            </button>
+                            <button type="button" class="btn btn-secondary" @onclick="Cancelar">
+                                <i class="fas fa-times"></i> Cancelar
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<ResultadoIndicador> resultadoIndicadores = new();
+    private ResultadoIndicador resultadoIndicador = new();
+    private bool mostrarFormulario = false;
+    private string? mensajeAlerta;
+    private bool mostrarAlerta = false;
+
+    [Inject] private IRepository Repository { get; set; } = null!;
+    [Inject] private NavigationManager NavigationManager { get; set; } = null!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var url = "api/ResultadoIndicador";
+        resultadoIndicadores = await Repository.GetAsync<List<ResultadoIndicador>>(url);
+    }
+
+    private void MostrarFormulario()
+    {
+        resultadoIndicador = new ResultadoIndicador();
+        mostrarFormulario = true;
+    }
+
+    private void EditarResultadoIndicador(ResultadoIndicador r)
+    {
+        resultadoIndicador = new ResultadoIndicador
+        {
+            Id = r.Id,
+            Resultado = r.Resultado,
+            FechaCalculo = r.FechaCalculo,
+            FkIdIndicador = r.FkIdIndicador
+        };
+        mostrarFormulario = true;
+    }
+
+    private async Task GuardarResultadoIndicador()
+    {
+        var url1 = "api/ResultadoIndicador";
+        var url2 = $"api/ResultadoIndicador/{resultadoIndicador.Id}";
+
+        if (resultadoIndicador.Id == 0)
+            return;
+
+        var existe = resultadoIndicadores.Any(r => r.Id == resultadoIndicador.Id);
+
+        if (!existe)
+            await Repository.PostAsync(url1, resultadoIndicador);
+        else
+            await Repository.PutAsync(url2, resultadoIndicador);
+
+        resultadoIndicadores = await Repository.GetAsync<List<ResultadoIndicador>>(url1);
+        mostrarFormulario = false;
+        mensajeAlerta = "Resultado Indicador guardado correctamente";
+        mostrarAlerta = true;
+    }
+
+    private async Task EliminarResultadoIndicador(int id)
+    {
+        var url1 = "api/ResultadoIndicador";
+        var url2 = $"api/ResultadoIndicador/{id}";
+
+        await Repository.DeleteAsync(url2);
+        resultadoIndicadores = await Repository.GetAsync<List<ResultadoIndicador>>(url1);
+        mensajeAlerta = "Resultado Indicador eliminado correctamente";
+        mostrarAlerta = true;
+    }
+
+    private void Cancelar()
+    {
+        mostrarFormulario = false;
+    }
+}

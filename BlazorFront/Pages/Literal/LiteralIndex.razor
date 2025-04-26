@@ -1,9 +1,9 @@
-﻿@page "/Usuarios"
+@page "/Literal"
 
-<h3 class="text-center mt-4">Gestión de Usuarios</h3>
+<h3 class="text-center mt-4">Gestión de Literal</h3>
 <div class="d-flex justify-content-end mb-3">
     <button class="btn btn-primary" @onclick="MostrarFormulario">
-        <i class="fas fa-plus"></i> Agregar Usuario
+        <i class="fas fa-plus"></i> Agregar Literal
     </button>
 </div>
 
@@ -15,16 +15,16 @@
     </div>
 }
 
-@if (usuarios is null)
+@if (litulares is null)
 {
     <div class="text-center">
         <div class="spinner-border text-primary" role="status"></div>
-        <p>Cargando usuarios...</p>
+        <p>Cargando literales...</p>
     </div>
 }
-else if (!usuarios.Any())
+else if (!litulares.Any())
 {
-    <div class="alert alert-info text-center">No hay usuarios disponibles.</div>
+    <div class="alert alert-info text-center">No hay literales disponibles.</div>
 }
 else
 {
@@ -32,23 +32,23 @@ else
         <thead class="table-dark">
             <tr>
                 <th>#</th>
-                <th>Email</th>
-                <th>Contraseña</th>
+                <th>Descripción</th>
+                <th>ID Artículo</th>
                 <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var (u, index) in usuarios.Select((u, i) => (u, i + 1)))
+            @foreach (var (l, index) in litulares.Select((l, i) => (l, i + 1)))
             {
                 <tr>
                     <td>@index</td>
-                    <td>@u.Email</td>
-                    <td>@u.Contrasena</td>
+                    <td>@l.Descripcion</td>
+                    <td>@l.FkIdArticulo</td>
                     <td>
-                        <button class="btn btn-warning btn-sm me-2" @onclick="() => EditarUsuario(u)">
+                        <button class="btn btn-warning btn-sm me-2" @onclick="() => EditarLiteral(l)">
                             <i class="fas fa-edit"></i> Editar
                         </button>
-                        <button class="btn btn-danger btn-sm" @onclick="() => EliminarUsuario(u.Email)">
+                        <button class="btn btn-danger btn-sm" @onclick="() => EliminarLiteral(l.Id)">
                             <i class="fas fa-trash"></i> Eliminar
                         </button>
                     </td>
@@ -64,19 +64,22 @@ else
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">@(string.IsNullOrEmpty(usuario.Email) ? "Agregar Usuario" : "Editar Usuario")
-                    </h5>
+                    <h5 class="modal-title">@(string.IsNullOrEmpty(literal.Id) ? "Agregar Literal" : "Editar Literal")</h5>
                     <button type="button" class="btn-close" @onclick="Cancelar"></button>
                 </div>
                 <div class="modal-body">
-                    <EditForm Model="usuario" OnValidSubmit="GuardarUsuario">
+                    <EditForm Model="literal" OnValidSubmit="GuardarLiteral">
                         <div class="mb-3">
-                            <label class="form-label">Email:</label>
-                            <InputText class="form-control" @bind-Value="usuario.Email" required />
+                            <label class="form-label">ID:</label>
+                            <InputText class="form-control" @bind-Value="literal.Id" required />
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Contraseña:</label>
-                            <InputText class="form-control" type="password" @bind-Value="usuario.Contrasena" required />
+                            <label class="form-label">Descripción:</label>
+                            <InputTextArea class="form-control" @bind-Value="literal.Descripcion" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">ID Artículo:</label>
+                            <InputText class="form-control" @bind-Value="literal.FkIdArticulo" required />
                         </div>
                         <div class="d-flex justify-content-end">
                             <button type="submit" class="btn btn-success me-2">
@@ -92,73 +95,69 @@ else
         </div>
     </div>
 }
+
 @code {
-    private List<Usuario> usuarios = new();
-    private Usuario usuario = new();
+    private List<Literal> litulares = new();
+    private Literal literal = new();
     private bool mostrarFormulario = false;
     private string? mensajeAlerta;
     private bool mostrarAlerta = false;
-
-    private bool esEditar = false;
 
     [Inject] private IRepository Repository { get; set; } = null!;
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
 
     protected override async Task OnInitializedAsync()
     {
-        var url = "api/Usuarios";
-        usuarios = await Repository.GetAsync<List<Usuario>>(url);
+        var url = "api/Literal";
+        litulares = await Repository.GetAsync<List<Literal>>(url);
     }
 
     private void MostrarFormulario()
     {
-        usuario = new Usuario();
-        esEditar = false;
+        literal = new Literal();
         mostrarFormulario = true;
     }
 
-
-    private void EditarUsuario(Usuario u)
+    private void EditarLiteral(Literal l)
     {
-        usuario = new Usuario
+        literal = new Literal
         {
-            Contrasena = u.Contrasena,
-            Email = u.Email
+            Id = l.Id,
+            Descripcion = l.Descripcion,
+            FkIdArticulo = l.FkIdArticulo
         };
-        esEditar = true;
         mostrarFormulario = true;
     }
 
-
-    private async Task GuardarUsuario()
+    private async Task GuardarLiteral()
     {
-        var url1 = "api/Usuarios";
-        var url2 = $"api/Usuarios/{Uri.EscapeDataString(usuario.Email)}";
+        var url1 = "api/Literal";
+        var url2 = $"api/Literal/{literal.Id}";
 
-        if (esEditar)
-        {
-            var response = await Repository.PutAsync<Usuario>(url2, usuario);
-        }
+        if (string.IsNullOrEmpty(literal.Id))
+            return;
+
+        var existe = litulares.Any(l => l.Id == literal.Id);
+
+        if (!existe)
+            await Repository.PostAsync(url1, literal);
         else
-        {
-            var response = await Repository.PostAsync<Usuario>(url1, usuario);
-        }
+            await Repository.PutAsync(url2, literal);
 
-        usuarios = await Repository.GetAsync<List<Usuario>>(url1);
+        litulares = await Repository.GetAsync<List<Literal>>(url1);
         mostrarFormulario = false;
-        mensajeAlerta = "Usuario guardado correctamente";
+        mensajeAlerta = "Literal guardado correctamente";
         mostrarAlerta = true;
     }
 
-
-    private async Task EliminarUsuario(string email)
+    private async Task EliminarLiteral(string id)
     {
-        var url1 = "api/Usuarios";
-        var url2 = $"api/Usuarios/{usuario.Email}";
+        var url1 = "api/Literal";
+        var url2 = $"api/Literal/{id}";
 
         await Repository.DeleteAsync(url2);
-        usuarios = await Repository.GetAsync<List<Usuario>>(url1);
-        mensajeAlerta = "Usuario eliminado correctamente";
+        litulares = await Repository.GetAsync<List<Literal>>(url1);
+        mensajeAlerta = "Literal eliminado correctamente";
         mostrarAlerta = true;
     }
 

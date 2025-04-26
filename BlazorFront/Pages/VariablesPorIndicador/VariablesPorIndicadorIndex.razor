@@ -1,0 +1,187 @@
+@page "/VariablesPorIndicador"
+
+<h3 class="text-center mt-4">Gestión de Variables por Indicador</h3>
+<div class="d-flex justify-content-end mb-3">
+    <button class="btn btn-primary" @onclick="MostrarFormulario">
+        <i class="fas fa-plus"></i> Agregar Variable</button>
+</div>
+
+@if (mostrarAlerta)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @mensajeAlerta
+        <button type="button" class="btn-close" @onclick="() => mostrarAlerta = false"></button>
+    </div>
+}
+
+@if (variablesPorIndicador is null)
+{
+    <div class="text-center">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p>Cargando variables...</p>
+    </div>
+}
+else if (!variablesPorIndicador.Any())
+{
+    <div class="alert alert-info text-center">No hay variables disponibles.</div>
+}
+else
+{
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>ID Variable</th>
+                <th>ID Indicador</th>
+                <th>Dato</th>
+                <th>Email Usuario</th>
+                <th>Fecha Dato</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var (v, index) in variablesPorIndicador.Select((v, i) => (v, i + 1)))
+            {
+                <tr>
+                    <td>@index</td>
+                    <td>@v.FkIdVariable</td>
+                    <td>@v.FkIdIndicador</td>
+                    <td>@v.Dato</td>
+                    <td>@v.FkEmailUsuario</td>
+                    <td>@v.FechaDato.ToString("yyyy-MM-dd")</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm me-2" @onclick="() => EditarVariable(v)">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
+                        <button class="btn btn-danger btn-sm" @onclick="() => EliminarVariable(v.Id)">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@if (mostrarFormulario)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(variable.Id == 0 ? "Agregar Variable" : "Editar Variable")</h5>
+                    <button type="button" class="btn-close" @onclick="Cancelar"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="variable" OnValidSubmit="GuardarVariable">
+                        <div class="mb-3">
+                            <label class="form-label">ID Variable:</label>
+                            <InputNumber class="form-control" @bind-Value="variable.FkIdVariable" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">ID Indicador:</label>
+                            <InputNumber class="form-control" @bind-Value="variable.FkIdIndicador" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Dato:</label>
+                            <InputNumber class="form-control" @bind-Value="variable.Dato" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email Usuario:</label>
+                            <InputText class="form-control" @bind-Value="variable.FkEmailUsuario" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Fecha Dato:</label>
+                            <InputDate class="form-control" @bind-Value="variable.FechaDato" required />
+                        </div>
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-success me-2">
+                                <i class="fas fa-save"></i> Guardar
+                            </button>
+                            <button type="button" class="btn btn-secondary" @onclick="Cancelar">
+                                <i class="fas fa-times"></i> Cancelar
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<VariablesPorIndicador> variablesPorIndicador = new();
+    private VariablesPorIndicador variable = new();
+    private bool mostrarFormulario = false;
+    private string? mensajeAlerta;
+    private bool mostrarAlerta = false;
+
+    [Inject] private IRepository Repository { get; set; } = null!;
+    [Inject] private NavigationManager NavigationManager { get; set; } = null!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var url = "api/VariablesPorIndicador";
+        variablesPorIndicador = await Repository.GetAsync<List<VariablesPorIndicador>>(url);
+    }
+
+    private void MostrarFormulario()
+    {
+        variable = new VariablesPorIndicador
+        {
+            FechaDato = DateTime.Today // default
+        };
+        mostrarFormulario = true;
+    }
+
+    private void EditarVariable(VariablesPorIndicador v)
+    {
+        variable = new VariablesPorIndicador
+        {
+            Id = v.Id,
+            FkIdVariable = v.FkIdVariable,
+            FkIdIndicador = v.FkIdIndicador,
+            Dato = v.Dato,
+            FkEmailUsuario = v.FkEmailUsuario,
+            FechaDato = v.FechaDato
+        };
+        mostrarFormulario = true;
+    }
+
+    private async Task GuardarVariable()
+    {
+        var url1 = "api/VariablesPorIndicador";
+        var url2 = $"api/VariablesPorIndicador/{variable.Id}";
+
+        if (variable.FkIdVariable == 0 || variable.FkIdIndicador == 0 || string.IsNullOrEmpty(variable.FkEmailUsuario))
+            return;
+
+        var existe = variablesPorIndicador.Any(v => v.Id == variable.Id);
+
+        if (!existe)
+            await Repository.PostAsync(url1, variable);
+        else
+            await Repository.PutAsync(url2, variable);
+
+        variablesPorIndicador = await Repository.GetAsync<List<VariablesPorIndicador>>(url1);
+        mostrarFormulario = false;
+        mensajeAlerta = "Variable guardada correctamente";
+        mostrarAlerta = true;
+    }
+
+    private async Task EliminarVariable(int id)
+    {
+        var url1 = "api/VariablesPorIndicador";
+        var url2 = $"api/VariablesPorIndicador/{id}";
+
+        await Repository.DeleteAsync(url2);
+        variablesPorIndicador = await Repository.GetAsync<List<VariablesPorIndicador>>(url1);
+        mensajeAlerta = "Variable eliminada correctamente";
+        mostrarAlerta = true;
+    }
+
+    private void Cancelar()
+    {
+        mostrarFormulario = false;
+    }
+}

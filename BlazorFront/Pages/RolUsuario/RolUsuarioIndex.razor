@@ -1,9 +1,9 @@
-﻿@page "/Usuarios"
+@page "/RolUsuario"
 
-<h3 class="text-center mt-4">Gestión de Usuarios</h3>
+<h3 class="text-center mt-4">Gestión de Rol de Usuario</h3>
 <div class="d-flex justify-content-end mb-3">
     <button class="btn btn-primary" @onclick="MostrarFormulario">
-        <i class="fas fa-plus"></i> Agregar Usuario
+        <i class="fas fa-plus"></i> Agregar Rol de Usuario
     </button>
 </div>
 
@@ -15,16 +15,16 @@
     </div>
 }
 
-@if (usuarios is null)
+@if (rolesUsuarios is null)
 {
     <div class="text-center">
         <div class="spinner-border text-primary" role="status"></div>
-        <p>Cargando usuarios...</p>
+        <p>Cargando roles de usuario...</p>
     </div>
 }
-else if (!usuarios.Any())
+else if (!rolesUsuarios.Any())
 {
-    <div class="alert alert-info text-center">No hay usuarios disponibles.</div>
+    <div class="alert alert-info text-center">No hay roles de usuario disponibles.</div>
 }
 else
 {
@@ -33,22 +33,22 @@ else
             <tr>
                 <th>#</th>
                 <th>Email</th>
-                <th>Contraseña</th>
+                <th>ID Rol</th>
                 <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var (u, index) in usuarios.Select((u, i) => (u, i + 1)))
+            @foreach (var (ru, index) in rolesUsuarios.Select((ru, i) => (ru, i + 1)))
             {
                 <tr>
                     <td>@index</td>
-                    <td>@u.Email</td>
-                    <td>@u.Contrasena</td>
+                    <td>@ru.FkEmail</td>
+                    <td>@ru.FkIdRol</td>
                     <td>
-                        <button class="btn btn-warning btn-sm me-2" @onclick="() => EditarUsuario(u)">
+                        <button class="btn btn-warning btn-sm me-2" @onclick="() => EditarRolUsuario(ru)">
                             <i class="fas fa-edit"></i> Editar
                         </button>
-                        <button class="btn btn-danger btn-sm" @onclick="() => EliminarUsuario(u.Email)">
+                        <button class="btn btn-danger btn-sm" @onclick="() => EliminarRolUsuario(ru.FkEmail, ru.FkIdRol)">
                             <i class="fas fa-trash"></i> Eliminar
                         </button>
                     </td>
@@ -64,19 +64,18 @@ else
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">@(string.IsNullOrEmpty(usuario.Email) ? "Agregar Usuario" : "Editar Usuario")
-                    </h5>
+                    <h5 class="modal-title">@(string.IsNullOrEmpty(rolUsuario.FkEmail) ? "Agregar Rol de Usuario" : "Editar Rol de Usuario")</h5>
                     <button type="button" class="btn-close" @onclick="Cancelar"></button>
                 </div>
                 <div class="modal-body">
-                    <EditForm Model="usuario" OnValidSubmit="GuardarUsuario">
+                    <EditForm Model="rolUsuario" OnValidSubmit="GuardarRolUsuario">
                         <div class="mb-3">
                             <label class="form-label">Email:</label>
-                            <InputText class="form-control" @bind-Value="usuario.Email" required />
+                            <InputText class="form-control" @bind-Value="rolUsuario.FkEmail" required />
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Contraseña:</label>
-                            <InputText class="form-control" type="password" @bind-Value="usuario.Contrasena" required />
+                            <label class="form-label">ID Rol:</label>
+                            <InputNumber class="form-control" @bind-Value="rolUsuario.FkIdRol" required />
                         </div>
                         <div class="d-flex justify-content-end">
                             <button type="submit" class="btn btn-success me-2">
@@ -92,73 +91,82 @@ else
         </div>
     </div>
 }
+
 @code {
-    private List<Usuario> usuarios = new();
-    private Usuario usuario = new();
+    private List<RolUsuario> rolesUsuarios = new();
+    private RolUsuario rolUsuario = new();
     private bool mostrarFormulario = false;
     private string? mensajeAlerta;
     private bool mostrarAlerta = false;
-
-    private bool esEditar = false;
 
     [Inject] private IRepository Repository { get; set; } = null!;
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
 
     protected override async Task OnInitializedAsync()
     {
-        var url = "api/Usuarios";
-        usuarios = await Repository.GetAsync<List<Usuario>>(url);
+        var url = "api/RolUsuario";
+        rolesUsuarios = await Repository.GetAsync<List<RolUsuario>>(url);
     }
 
     private void MostrarFormulario()
     {
-        usuario = new Usuario();
-        esEditar = false;
+        rolUsuario = new RolUsuario();
         mostrarFormulario = true;
     }
 
-
-    private void EditarUsuario(Usuario u)
+    private void EditarRolUsuario(RolUsuario ru)
     {
-        usuario = new Usuario
+        rolUsuario = new RolUsuario
         {
-            Contrasena = u.Contrasena,
-            Email = u.Email
+            FkEmail = ru.FkEmail,
+            FkIdRol = ru.FkIdRol
         };
-        esEditar = true;
         mostrarFormulario = true;
     }
 
+   private async Task GuardarRolUsuario()
+{
+    var url1 = "api/RolUsuario";
+    var url2 = $"api/RolUsuario/{Uri.EscapeDataString(rolUsuario.FkEmail)}/{rolUsuario.FkIdRol}";
 
-    private async Task GuardarUsuario()
+    if (string.IsNullOrEmpty(rolUsuario.FkEmail) || rolUsuario.FkIdRol == 0)
+        return;
+
+    var existe = rolesUsuarios.Any(ru => ru.FkEmail == rolUsuario.FkEmail && ru.FkIdRol == rolUsuario.FkIdRol);
+
+    try
     {
-        var url1 = "api/Usuarios";
-        var url2 = $"api/Usuarios/{Uri.EscapeDataString(usuario.Email)}";
-
-        if (esEditar)
+        if (!existe)
         {
-            var response = await Repository.PutAsync<Usuario>(url2, usuario);
+            await Repository.PostAsync(url1, rolUsuario);
+            mensajeAlerta = "Rol de usuario creado correctamente";
         }
         else
         {
-            var response = await Repository.PostAsync<Usuario>(url1, usuario);
+            await Repository.PutAsync(url2, rolUsuario);
+            mensajeAlerta = "Rol de usuario actualizado correctamente";
         }
 
-        usuarios = await Repository.GetAsync<List<Usuario>>(url1);
+        rolesUsuarios = await Repository.GetAsync<List<RolUsuario>>(url1);
         mostrarFormulario = false;
-        mensajeAlerta = "Usuario guardado correctamente";
         mostrarAlerta = true;
     }
-
-
-    private async Task EliminarUsuario(string email)
+    catch (Exception ex)
     {
-        var url1 = "api/Usuarios";
-        var url2 = $"api/Usuarios/{usuario.Email}";
+        mensajeAlerta = "Hubo un error al guardar el rol de usuario.";
+        mostrarAlerta = true;
+        Console.WriteLine($"Error guardando rol usuario: {ex.Message}");
+    }
+}
+
+    private async Task EliminarRolUsuario(string email, int idRol)
+    {
+        var url1 = "api/RolUsuario";
+        var url2 = $"api/RolUsuario/{email}/{idRol}";
 
         await Repository.DeleteAsync(url2);
-        usuarios = await Repository.GetAsync<List<Usuario>>(url1);
-        mensajeAlerta = "Usuario eliminado correctamente";
+        rolesUsuarios = await Repository.GetAsync<List<RolUsuario>>(url1);
+        mensajeAlerta = "Rol de usuario eliminado correctamente";
         mostrarAlerta = true;
     }
 

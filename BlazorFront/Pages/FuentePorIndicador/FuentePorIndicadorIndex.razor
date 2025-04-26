@@ -1,9 +1,9 @@
-﻿@page "/Usuarios"
+@page "/FuentePorIndicador"
 
-<h3 class="text-center mt-4">Gestión de Usuarios</h3>
+<h3 class="text-center mt-4">Gestión de Fuente por Indicador</h3>
 <div class="d-flex justify-content-end mb-3">
     <button class="btn btn-primary" @onclick="MostrarFormulario">
-        <i class="fas fa-plus"></i> Agregar Usuario
+        <i class="fas fa-plus"></i> Agregar Relación
     </button>
 </div>
 
@@ -15,16 +15,16 @@
     </div>
 }
 
-@if (usuarios is null)
+@if (fuentesPorIndicador is null)
 {
     <div class="text-center">
         <div class="spinner-border text-primary" role="status"></div>
-        <p>Cargando usuarios...</p>
+        <p>Cargando datos...</p>
     </div>
 }
-else if (!usuarios.Any())
+else if (!fuentesPorIndicador.Any())
 {
-    <div class="alert alert-info text-center">No hay usuarios disponibles.</div>
+    <div class="alert alert-info text-center">No hay relaciones disponibles.</div>
 }
 else
 {
@@ -32,23 +32,23 @@ else
         <thead class="table-dark">
             <tr>
                 <th>#</th>
-                <th>Email</th>
-                <th>Contraseña</th>
+                <th>ID Fuente</th>
+                <th>ID Indicador</th>
                 <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var (u, index) in usuarios.Select((u, i) => (u, i + 1)))
+            @foreach (var (rel, index) in fuentesPorIndicador.Select((r, i) => (r, i + 1)))
             {
                 <tr>
                     <td>@index</td>
-                    <td>@u.Email</td>
-                    <td>@u.Contrasena</td>
+                    <td>@rel.FkIdFuente</td>
+                    <td>@rel.FkIdIndicador</td>
                     <td>
-                        <button class="btn btn-warning btn-sm me-2" @onclick="() => EditarUsuario(u)">
+                        <button class="btn btn-warning btn-sm me-2" @onclick="() => EditarRelacion(rel)">
                             <i class="fas fa-edit"></i> Editar
                         </button>
-                        <button class="btn btn-danger btn-sm" @onclick="() => EliminarUsuario(u.Email)">
+                        <button class="btn btn-danger btn-sm" @onclick="() => EliminarRelacion(rel.FkIdFuente, rel.FkIdIndicador)">
                             <i class="fas fa-trash"></i> Eliminar
                         </button>
                     </td>
@@ -64,19 +64,18 @@ else
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">@(string.IsNullOrEmpty(usuario.Email) ? "Agregar Usuario" : "Editar Usuario")
-                    </h5>
+                    <h5 class="modal-title">@(esNuevo ? "Agregar Relación" : "Editar Relación")</h5>
                     <button type="button" class="btn-close" @onclick="Cancelar"></button>
                 </div>
                 <div class="modal-body">
-                    <EditForm Model="usuario" OnValidSubmit="GuardarUsuario">
+                    <EditForm Model="relacion" OnValidSubmit="GuardarRelacion">
                         <div class="mb-3">
-                            <label class="form-label">Email:</label>
-                            <InputText class="form-control" @bind-Value="usuario.Email" required />
+                            <label class="form-label">ID Fuente:</label>
+                            <InputNumber class="form-control" @bind-Value="relacion.FkIdFuente" required />
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Contraseña:</label>
-                            <InputText class="form-control" type="password" @bind-Value="usuario.Contrasena" required />
+                            <label class="form-label">ID Indicador:</label>
+                            <InputNumber class="form-control" @bind-Value="relacion.FkIdIndicador" required />
                         </div>
                         <div class="d-flex justify-content-end">
                             <button type="submit" class="btn btn-success me-2">
@@ -92,73 +91,66 @@ else
         </div>
     </div>
 }
+
 @code {
-    private List<Usuario> usuarios = new();
-    private Usuario usuario = new();
+    private List<FuentePorIndicador> fuentesPorIndicador = new();
+    private FuentePorIndicador relacion = new();
     private bool mostrarFormulario = false;
+    private bool esNuevo = true;
     private string? mensajeAlerta;
     private bool mostrarAlerta = false;
-
-    private bool esEditar = false;
 
     [Inject] private IRepository Repository { get; set; } = null!;
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
 
     protected override async Task OnInitializedAsync()
     {
-        var url = "api/Usuarios";
-        usuarios = await Repository.GetAsync<List<Usuario>>(url);
+        var url = "api/FuentePorIndicador";
+        fuentesPorIndicador = await Repository.GetAsync<List<FuentePorIndicador>>(url);
     }
 
     private void MostrarFormulario()
     {
-        usuario = new Usuario();
-        esEditar = false;
+        relacion = new FuentePorIndicador();
+        esNuevo = true;
         mostrarFormulario = true;
     }
 
-
-    private void EditarUsuario(Usuario u)
+    private void EditarRelacion(FuentePorIndicador rel)
     {
-        usuario = new Usuario
+        relacion = new FuentePorIndicador
         {
-            Contrasena = u.Contrasena,
-            Email = u.Email
+            FkIdFuente = rel.FkIdFuente,
+            FkIdIndicador = rel.FkIdIndicador
         };
-        esEditar = true;
+        esNuevo = false;
         mostrarFormulario = true;
     }
 
-
-    private async Task GuardarUsuario()
+    private async Task GuardarRelacion()
     {
-        var url1 = "api/Usuarios";
-        var url2 = $"api/Usuarios/{Uri.EscapeDataString(usuario.Email)}";
+        var url = "api/FuentePorIndicador";
+        var compositeKey = $"{relacion.FkIdFuente}/{relacion.FkIdIndicador}";
+        var urlPut = $"api/FuentePorIndicador/{compositeKey}";
 
-        if (esEditar)
-        {
-            var response = await Repository.PutAsync<Usuario>(url2, usuario);
-        }
+        if (esNuevo)
+            await Repository.PostAsync(url, relacion);
         else
-        {
-            var response = await Repository.PostAsync<Usuario>(url1, usuario);
-        }
+            await Repository.PutAsync(urlPut, relacion);
 
-        usuarios = await Repository.GetAsync<List<Usuario>>(url1);
+        fuentesPorIndicador = await Repository.GetAsync<List<FuentePorIndicador>>(url);
         mostrarFormulario = false;
-        mensajeAlerta = "Usuario guardado correctamente";
+        mensajeAlerta = "Relación guardada correctamente";
         mostrarAlerta = true;
     }
 
-
-    private async Task EliminarUsuario(string email)
+    private async Task EliminarRelacion(int fuenteId, int indicadorId)
     {
-        var url1 = "api/Usuarios";
-        var url2 = $"api/Usuarios/{usuario.Email}";
+        var url = $"api/FuentePorIndicador/{fuenteId}/{indicadorId}";
+        await Repository.DeleteAsync(url);
 
-        await Repository.DeleteAsync(url2);
-        usuarios = await Repository.GetAsync<List<Usuario>>(url1);
-        mensajeAlerta = "Usuario eliminado correctamente";
+        fuentesPorIndicador = await Repository.GetAsync<List<FuentePorIndicador>>("api/FuentePorIndicador");
+        mensajeAlerta = "Relación eliminada correctamente";
         mostrarAlerta = true;
     }
 
