@@ -30,6 +30,10 @@ namespace CRUD.Backend.Data
         public DbSet<RolUsuario> RolUsuario { get; set; }
         public DbSet<Indicador> Indicador { get; set; }
         public DbSet<VariablesPorIndicador> VariablesPorIndicador { get; set; }
+        public DbSet<RepresenVisualPorIndicador> RepresenVisualPorIndicador { get; set; }
+        public DbSet<ResponsablesPorIndicador> ResponsablesPorIndicador { get; set; }
+
+        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -49,18 +53,18 @@ namespace CRUD.Backend.Data
 
             modelBuilder.Entity<RolUsuario>()
                 .HasKey(r => new { r.FkEmail, r.FkIdRol });
-            
+
             modelBuilder.Entity<RolUsuario>()
                 .ToTable("rol_usuario");
 
             modelBuilder.Entity<Indicador>(entity =>
             {
-                entity.HasKey(i => i.Id); 
+                entity.HasKey(i => i.Id);
 
                 entity.HasOne<TipoIndicador>()
                     .WithMany()
                     .HasForeignKey(i => i.FkIdTipoIndicador)
-                    .OnDelete(DeleteBehavior.Restrict); 
+                    .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasOne<UnidadMedicion>()
                     .WithMany()
@@ -80,7 +84,7 @@ namespace CRUD.Backend.Data
                 entity.HasOne<Articulo>()
                     .WithMany()
                     .HasForeignKey(i => i.FkIdArticulo)
-                    .OnDelete(DeleteBehavior.SetNull); 
+                    .OnDelete(DeleteBehavior.SetNull);
 
                 entity.HasOne<Literal>()
                     .WithMany()
@@ -97,7 +101,10 @@ namespace CRUD.Backend.Data
                     .HasForeignKey(i => i.FkIdParagrafo)
                     .OnDelete(DeleteBehavior.SetNull);
             });
+            modelBuilder.Entity<RepresenVisualPorIndicador>()
+                .HasKey(r => new { r.FkIdIndicador, r.FkIdRepresenVisual });
+            modelBuilder.Entity<ResponsablesPorIndicador>()
+                .HasKey(r => new { r.FkIdResponsable, r.FkIdIndicador });
         }
-
     }
 }
