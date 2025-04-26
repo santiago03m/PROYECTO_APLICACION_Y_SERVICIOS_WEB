@@ -21,6 +21,7 @@ namespace CRUD.Backend.Data
         public DbSet<RepresentacionVisual> RepresenVisual { get; set; }
         public DbSet<Articulo> Articulo { get; set; }
         public DbSet<FuentePorIndicador> FuentesPorIndicador { get; set; }
+        public DbSet<ResultadoIndicador> ResultadoIndicador { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
