@@ -20,5 +20,14 @@ namespace CRUD.Backend.Data
         public DbSet<Fuente> Fuente { get; set; }
         public DbSet<RepresentacionVisual> RepresenVisual { get; set; }
         public DbSet<Articulo> Articulo { get; set; }
+        public DbSet<FuentePorIndicador> FuentesPorIndicador { get; set; }
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<FuentePorIndicador>()
+                .HasKey(f => new { f.FkIdFuente, f.FkIdIndicador });
+        }
+
     }
 }
