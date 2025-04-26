@@ -29,6 +29,7 @@ namespace CRUD.Backend.Data
         public DbSet<Actor> Actor { get; set; }
         public DbSet<RolUsuario> RolUsuario { get; set; }
         public DbSet<Indicador> Indicador { get; set; }
+        public DbSet<VariablesPorIndicador> VariablesPorIndicador { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
