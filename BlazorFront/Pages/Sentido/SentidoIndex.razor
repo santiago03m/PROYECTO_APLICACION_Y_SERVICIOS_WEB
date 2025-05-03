@@ -1,4 +1,6 @@
-﻿@page "/Sentido"
+﻿@using Blazored.LocalStorage
+
+@page "/Sentido"
 
 <h3 class="text-center mt-4">Gestión de Sentidos</h3>
 @if (rolPrincipal == "admin")
@@ -103,11 +105,6 @@ else
     private bool mostrarAlerta = false;
     private string rolPrincipal = string.Empty;
 
-    protected override async Task OnInitializedAsync()
-    {
-        rolPrincipal = await localStorage.GetItemAsStringAsync("rolPrincipal");
-    }
-
     [Inject] private IRepository Repository { get; set; } = null!;
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
 
@@ -115,6 +112,7 @@ else
     {
         var url = "api/Sentido";
         sentidos = await Repository.GetAsync<List<Sentido>>(url);
+        rolPrincipal = await localStorage.GetItemAsStringAsync("rolPrincipal");
     }
 
     private void MostrarFormulario()

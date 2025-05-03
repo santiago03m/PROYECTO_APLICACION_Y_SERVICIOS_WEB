@@ -1,3 +1,5 @@
+@using Blazored.LocalStorage
+
 @page "/FuentePorIndicador"
 
 <h3 class="text-center mt-4">Gestión de Fuente por Indicador</h3>
@@ -113,10 +115,6 @@ else
 
     private string rolPrincipal = string.Empty;
 
-    protected override async Task OnInitializedAsync()
-    {
-        rolPrincipal = await localStorage.GetItemAsStringAsync("rolPrincipal");
-    }
 
     [Inject] private IRepository Repository { get; set; } = null!;
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
@@ -125,6 +123,7 @@ else
     {
         var url = "api/FuentePorIndicador";
         fuentesPorIndicador = await Repository.GetAsync<List<FuentePorIndicador>>(url);
+        rolPrincipal = await localStorage.GetItemAsStringAsync("rolPrincipal");
     }
 
     private void MostrarFormulario()

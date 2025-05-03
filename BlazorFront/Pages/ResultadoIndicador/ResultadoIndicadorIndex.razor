@@ -1,3 +1,5 @@
+@using Blazored.LocalStorage
+
 @page "/ResultadoIndicador"
 
 <h3 class="text-center mt-4">Gestión de Resultado Indicador</h3>
@@ -121,10 +123,6 @@ else
     private bool mostrarAlerta = false;
     private string rolPrincipal = string.Empty;
 
-    protected override async Task OnInitializedAsync()
-    {
-        rolPrincipal = await localStorage.GetItemAsStringAsync("rolPrincipal");
-    }
     [Inject] private IRepository Repository { get; set; } = null!;
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
 
@@ -132,6 +130,7 @@ else
     {
         var url = "api/ResultadoIndicador";
         resultadoIndicadores = await Repository.GetAsync<List<ResultadoIndicador>>(url);
+        rolPrincipal = await localStorage.GetItemAsStringAsync("rolPrincipal");
     }
 
     private void MostrarFormulario()

@@ -1,3 +1,5 @@
+@using Blazored.LocalStorage
+
 @page "/Variable"
 
 <h3 class="text-center mt-4">Gestión de Variable</h3>
@@ -120,11 +122,6 @@ else
     private string? mensajeAlerta;
     private bool mostrarAlerta = false;
     private string rolPrincipal = string.Empty;
-    protected override async Task OnInitializedAsync()
-    {
-        rolPrincipal = await localStorage.GetItemAsStringAsync("rolPrincipal");
-    }
-
     [Inject] private IRepository Repository { get; set; } = null!;
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
 
@@ -132,6 +129,7 @@ else
     {
         var url = "api/Variable";
         variables = await Repository.GetAsync<List<Variable>>(url);
+        rolPrincipal = await localStorage.GetItemAsStringAsync("rolPrincipal");
     }
 
     private void MostrarFormulario()

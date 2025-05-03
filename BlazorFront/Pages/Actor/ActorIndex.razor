@@ -1,3 +1,5 @@
+@using Blazored.LocalStorage
+
 @page "/Actor"
 
 <h3 class="text-center mt-4">Gestión de Actor</h3>
@@ -71,7 +73,6 @@ else
 {
     <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
         <div class="modal-dialog">
-            using __Blazor.BlazorFront.Pages.Actor.ActorIndex;
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">@(string.IsNullOrEmpty(actor.Id) ? "Agregar Actor" : "Editar Actor")</h5>

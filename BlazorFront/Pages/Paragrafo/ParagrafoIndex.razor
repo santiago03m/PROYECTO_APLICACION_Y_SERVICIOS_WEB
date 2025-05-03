@@ -1,3 +1,5 @@
+@using Blazored.LocalStorage
+
 @page "/Paragrafo"
 
 <h3 class="text-center mt-4">Gestión de Párrafo</h3>
@@ -116,11 +118,6 @@ else
 
     private string rolPrincipal = string.Empty;
 
-    protected override async Task OnInitializedAsync()
-    {
-        rolPrincipal = await localStorage.GetItemAsStringAsync("rolPrincipal");
-    }
-
     [Inject] private IRepository Repository { get; set; } = null!;
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
 
@@ -128,6 +125,7 @@ else
     {
         var url = "api/Paragrafo";
         parrafos = await Repository.GetAsync<List<Paragrafo>>(url);
+        rolPrincipal = await localStorage.GetItemAsStringAsync("rolPrincipal");
     }
 
     private void MostrarFormulario()

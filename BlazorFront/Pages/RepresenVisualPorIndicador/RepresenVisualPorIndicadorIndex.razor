@@ -1,3 +1,5 @@
+@using Blazored.LocalStorage
+
 @page "/RepresenVisualPorIndicador"
 
 <h3 class="text-center mt-4">Gestión de Representaciones Visuales por Indicador</h3>
@@ -50,13 +52,13 @@ else
                     <td>
                         @if (rolPrincipal == "admin" || rolPrincipal == "Validador")
                         {
-                            <button class="btn btn-warning btn-sm me-2" @onclick="() => EditarRegistro(a)">
+                            <button class="btn btn-warning btn-sm me-2" @onclick="() => EditarRegistro(r)">
                                 <i class="fas fa-edit"></i> Editar
                             </button>
                         }
                         @if (rolPrincipal == "admin")
                         {
-                            <button class="btn btn-danger btn-sm" @onclick="() => EliminarRegistro(a.Id)">
+                            <button class="btn btn-danger btn-sm" @onclick="() => EliminarRegistro(r.FkIdIndicador, r.FkIdRepresenVisual)">
                                 <i class="fas fa-trash"></i> Eliminar
                             </button>
                         }
@@ -109,12 +111,7 @@ else
     private bool mostrarFormulario = false;
     private string? mensajeAlerta;
     private bool mostrarAlerta = false;
-     private string rolPrincipal = string.Empty;
-
-    protected override async Task OnInitializedAsync()
-    {
-        rolPrincipal = await localStorage.GetItemAsStringAsync("rolPrincipal");
-    }
+    private string rolPrincipal = string.Empty;
 
     [Inject] private IRepository Repository { get; set; } = null!;
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
@@ -123,6 +120,7 @@ else
     {
         var url = "api/RepresenVisualPorIndicador";
         registros = await Repository.GetAsync<List<RepresenVisualPorIndicador>>(url);
+        rolPrincipal = await localStorage.GetItemAsStringAsync("rolPrincipal");
     }
 
     private void MostrarFormulario()

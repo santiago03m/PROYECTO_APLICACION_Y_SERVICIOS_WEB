@@ -1,4 +1,6 @@
-﻿@page "/Seccion"
+﻿@using Blazored.LocalStorage
+
+@page "/Seccion"
 
 <h3 class="text-center mt-4">Gestión de Secciones</h3>
 @if (rolPrincipal == "admin")
@@ -109,11 +111,6 @@ else
     private bool mostrarAlerta = false;
     private string rolPrincipal = string.Empty;
 
-    protected override async Task OnInitializedAsync()
-    {
-        rolPrincipal = await localStorage.GetItemAsStringAsync("rolPrincipal");
-    }
-
     [Inject] private IRepository Repository { get; set; } = null!;
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
 
@@ -121,6 +118,7 @@ else
     {
         var url = "api/Seccion";
         secciones = await Repository.GetAsync<List<Seccion>>(url);
+        rolPrincipal = await localStorage.GetItemAsStringAsync("rolPrincipal");
     }
 
     private void MostrarFormulario()

@@ -1,4 +1,6 @@
-﻿@page "/UnidadMedicion"
+﻿@using Blazored.LocalStorage
+
+@page "/UnidadMedicion"
 
 <h3 class="text-center mt-4">Gestión de Unidad de Medición</h3>
 
@@ -106,10 +108,6 @@ else
     private bool mostrarAlerta = false;
      private string rolPrincipal = string.Empty;
 
-    protected override async Task OnInitializedAsync()
-    {
-        rolPrincipal = await localStorage.GetItemAsStringAsync("rolPrincipal");
-    }
 
     [Inject] private IRepository Repository { get; set; } = null!;
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
@@ -118,6 +116,7 @@ else
     {
         var url = "api/UnidadMedicion";
         unidadesMedicion = await Repository.GetAsync<List<UnidadMedicion>>(url);
+        rolPrincipal = await localStorage.GetItemAsStringAsync("rolPrincipal");
     }
 
     private void MostrarFormulario()

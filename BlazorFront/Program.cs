@@ -1,6 +1,8 @@
 using BlazorFront.Services;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Blazored.LocalStorage;
+
 
 namespace BlazorFront;
 
@@ -14,6 +16,7 @@ public class Program
         var url = "https://localhost:7123";
         builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(url) });
         builder.Services.AddScoped<IRepository, Repository>();
+        builder.Services.AddBlazoredLocalStorage();
 
         await builder.Build().RunAsync();
     }

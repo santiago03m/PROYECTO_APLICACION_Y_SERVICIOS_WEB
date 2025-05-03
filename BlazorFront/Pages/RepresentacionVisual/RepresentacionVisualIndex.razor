@@ -1,4 +1,6 @@
-﻿@page "/RepresentacionVisual"
+﻿@using Blazored.LocalStorage
+
+@page "/RepresentacionVisual"
 
 <h3 class="text-center mt-4">Gestión de Representación Visual</h3>
 @if (rolPrincipal == "admin")
@@ -106,11 +108,6 @@ else
 
      private string rolPrincipal = string.Empty;
 
-    protected override async Task OnInitializedAsync()
-    {
-        rolPrincipal = await localStorage.GetItemAsStringAsync("rolPrincipal");
-    }
-
     [Inject] private IRepository Repository { get; set; } = null!;
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
 
@@ -118,6 +115,7 @@ else
     {
         var url = "api/RepresentacionVisual";
         representaciones = await Repository.GetAsync<List<RepresentacionVisual>>(url);
+        rolPrincipal = await localStorage.GetItemAsStringAsync("rolPrincipal");
     }
 
     private void MostrarFormulario()
