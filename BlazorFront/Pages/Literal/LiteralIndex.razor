@@ -1,11 +1,14 @@
 @page "/Literal"
 
 <h3 class="text-center mt-4">Gestión de Literal</h3>
-<div class="d-flex justify-content-end mb-3">
-    <button class="btn btn-primary" @onclick="MostrarFormulario">
-        <i class="fas fa-plus"></i> Agregar Literal
-    </button>
-</div>
+@if (rolPrincipal == "admin")
+{
+    <div class="d-flex justify-content-end mb-3">
+        <button class="btn btn-primary" @onclick="MostrarFormulario">
+            <i class="fas fa-plus"></i> Agregar Literal
+        </button>
+    </div>
+}
 
 @if (mostrarAlerta)
 {
@@ -45,12 +48,18 @@ else
                     <td>@l.Descripcion</td>
                     <td>@l.FkIdArticulo</td>
                     <td>
-                        <button class="btn btn-warning btn-sm me-2" @onclick="() => EditarLiteral(l)">
-                            <i class="fas fa-edit"></i> Editar
-                        </button>
-                        <button class="btn btn-danger btn-sm" @onclick="() => EliminarLiteral(l.Id)">
-                            <i class="fas fa-trash"></i> Eliminar
-                        </button>
+                        @if (rolPrincipal == "admin" || rolPrincipal == "Validador")
+                        {
+                            <button class="btn btn-warning btn-sm me-2" @onclick="() => EditarLiteral(a)">
+                                <i class="fas fa-edit"></i> Editar
+                            </button>
+                        }
+                        @if (rolPrincipal == "admin")
+                        {
+                            <button class="btn btn-danger btn-sm" @onclick="() => EliminarLiteral(a.Id)">
+                                <i class="fas fa-trash"></i> Eliminar
+                            </button>
+                        }
                     </td>
                 </tr>
             }
@@ -96,12 +105,21 @@ else
     </div>
 }
 
+@inject ILocalStorageService localStorage
+
 @code {
     private List<Literal> litulares = new();
     private Literal literal = new();
     private bool mostrarFormulario = false;
     private string? mensajeAlerta;
     private bool mostrarAlerta = false;
+
+    private string rolPrincipal = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        rolPrincipal = await localStorage.GetItemAsStringAsync("rolPrincipal");
+    }
 
     [Inject] private IRepository Repository { get; set; } = null!;
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;

@@ -1,11 +1,14 @@
 @page "/FuentePorIndicador"
 
 <h3 class="text-center mt-4">Gestión de Fuente por Indicador</h3>
-<div class="d-flex justify-content-end mb-3">
-    <button class="btn btn-primary" @onclick="MostrarFormulario">
-        <i class="fas fa-plus"></i> Agregar Relación
-    </button>
-</div>
+@if (rolPrincipal == "admin")
+{
+    <div class="d-flex justify-content-end mb-3">
+        <button class="btn btn-primary" @onclick="MostrarFormulario">
+            <i class="fas fa-plus"></i> Agregar Relación
+        </button>
+    </div>
+}
 
 @if (mostrarAlerta)
 {
@@ -45,12 +48,18 @@ else
                     <td>@rel.FkIdFuente</td>
                     <td>@rel.FkIdIndicador</td>
                     <td>
-                        <button class="btn btn-warning btn-sm me-2" @onclick="() => EditarRelacion(rel)">
-                            <i class="fas fa-edit"></i> Editar
-                        </button>
-                        <button class="btn btn-danger btn-sm" @onclick="() => EliminarRelacion(rel.FkIdFuente, rel.FkIdIndicador)">
-                            <i class="fas fa-trash"></i> Eliminar
-                        </button>
+                        @if (rolPrincipal == "admin" || rolPrincipal == "Validador")
+                        {
+                            <button class="btn btn-warning btn-sm me-2" @onclick="() => EditarRelacion(a)">
+                                <i class="fas fa-edit"></i> Editar
+                            </button>
+                        }
+                        @if (rolPrincipal == "admin")
+                        {
+                            <button class="btn btn-danger btn-sm" @onclick="() => EliminarRelacion(a.Id)">
+                                <i class="fas fa-trash"></i> Eliminar
+                            </button>
+                        }
                     </td>
                 </tr>
             }
@@ -92,6 +101,8 @@ else
     </div>
 }
 
+@inject ILocalStorageService localStorage
+
 @code {
     private List<FuentePorIndicador> fuentesPorIndicador = new();
     private FuentePorIndicador relacion = new();
@@ -99,6 +110,13 @@ else
     private bool esNuevo = true;
     private string? mensajeAlerta;
     private bool mostrarAlerta = false;
+
+    private string rolPrincipal = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        rolPrincipal = await localStorage.GetItemAsStringAsync("rolPrincipal");
+    }
 
     [Inject] private IRepository Repository { get; set; } = null!;
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;

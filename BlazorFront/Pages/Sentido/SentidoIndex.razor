@@ -1,11 +1,14 @@
 ﻿@page "/Sentido"
 
 <h3 class="text-center mt-4">Gestión de Sentidos</h3>
-<div class="d-flex justify-content-end mb-3">
-    <button class="btn btn-primary" @onclick="MostrarFormulario">
-        <i class="fas fa-plus"></i> Agregar Sentido
-    </button>
-</div>
+@if (rolPrincipal == "admin")
+{
+    <div class="d-flex justify-content-end mb-3">
+        <button class="btn btn-primary" @onclick="MostrarFormulario">
+            <i class="fas fa-plus"></i> Agregar Sentido
+        </button>
+    </div>
+}
 
 @if (mostrarAlerta)
 {
@@ -43,12 +46,18 @@ else
                     <td>@index</td>
                     <td>@s.Nombre</td>
                     <td>
-                        <button class="btn btn-warning btn-sm me-2" @onclick="() => EditarSentido(s)">
-                            <i class="fas fa-edit"></i> Editar
-                        </button>
-                        <button class="btn btn-danger btn-sm" @onclick="() => EliminarSentido(s.Id)">
-                            <i class="fas fa-trash"></i> Eliminar
-                        </button>
+                        @if (rolPrincipal == "admin" || rolPrincipal == "Validador")
+                        {
+                            <button class="btn btn-warning btn-sm me-2" @onclick="() => EditarSentido(a)">
+                                <i class="fas fa-edit"></i> Editar
+                            </button>
+                        }
+                        @if (rolPrincipal == "admin")
+                        {
+                            <button class="btn btn-danger btn-sm" @onclick="() => EliminarSentido(a.Id)">
+                                <i class="fas fa-trash"></i> Eliminar
+                            </button>
+                        }
                     </td>
                 </tr>
             }
@@ -92,6 +101,12 @@ else
     private bool mostrarFormulario = false;
     private string? mensajeAlerta;
     private bool mostrarAlerta = false;
+    private string rolPrincipal = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        rolPrincipal = await localStorage.GetItemAsStringAsync("rolPrincipal");
+    }
 
     [Inject] private IRepository Repository { get; set; } = null!;
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
@@ -111,10 +126,10 @@ else
     private void EditarSentido(Sentido s)
     {
         sentido = new Sentido
-            {
-                Id = s.Id,
-                Nombre = s.Nombre
-            };
+        {
+            Id = s.Id,
+            Nombre = s.Nombre
+        };
         mostrarFormulario = true;
     }
 

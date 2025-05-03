@@ -1,11 +1,14 @@
 ﻿@page "/Frecuencia"
 
 <h3 class="text-center mt-4">Gestión de Frecuencia</h3>
-<div class="d-flex justify-content-end mb-3">
-    <button class="btn btn-primary" @onclick="MostrarFormulario">
-        <i class="fas fa-plus"></i> Agregar Frecuencia
-    </button>
-</div>
+@if (rolPrincipal == "admin")
+{
+    <div class="d-flex justify-content-end mb-3">
+        <button class="btn btn-primary" @onclick="MostrarFormulario">
+            <i class="fas fa-plus"></i> Agregar Frecuencia
+        </button>
+    </div>
+}
 
 @if (mostrarAlerta)
 {
@@ -43,12 +46,18 @@ else
                     <td>@index</td>
                     <td>@f.Nombre</td>
                     <td>
-                        <button class="btn btn-warning btn-sm me-2" @onclick="() => EditarFrecuencia(f)">
-                            <i class="fas fa-edit"></i> Editar
-                        </button>
-                        <button class="btn btn-danger btn-sm" @onclick="() => EliminarFrecuencia(f.Id)">
-                            <i class="fas fa-trash"></i> Eliminar
-                        </button>
+                        @if (rolPrincipal == "admin" || rolPrincipal == "Validador")
+                        {
+                            <button class="btn btn-warning btn-sm me-2" @onclick="() => EditarFrecuencia(a)">
+                                <i class="fas fa-edit"></i> Editar
+                            </button>
+                        }
+                        @if (rolPrincipal == "admin")
+                        {
+                            <button class="btn btn-danger btn-sm" @onclick="() => EliminarFrecuencia(a.Id)">
+                                <i class="fas fa-trash"></i> Eliminar
+                            </button>
+                        }
                     </td>
                 </tr>
             }
@@ -86,12 +95,21 @@ else
     </div>
 }
 
+@inject ILocalStorageService localStorage
+
 @code {
     private List<Frecuencia> frecuencias = new();
     private Frecuencia frecuencia = new();
     private bool mostrarFormulario = false;
     private string? mensajeAlerta;
     private bool mostrarAlerta = false;
+
+    private string rolPrincipal = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        rolPrincipal = await localStorage.GetItemAsStringAsync("rolPrincipal");
+    }
 
     [Inject] private IRepository Repository { get; set; } = null!;
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;

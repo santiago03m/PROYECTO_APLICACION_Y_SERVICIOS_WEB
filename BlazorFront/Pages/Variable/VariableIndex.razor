@@ -1,11 +1,14 @@
 @page "/Variable"
 
 <h3 class="text-center mt-4">Gestión de Variable</h3>
-<div class="d-flex justify-content-end mb-3">
-    <button class="btn btn-primary" @onclick="MostrarFormulario">
-        <i class="fas fa-plus"></i> Agregar Variable
-    </button>
-</div>
+@if (rolPrincipal == "admin")
+{
+    <div class="d-flex justify-content-end mb-3">
+        <button class="btn btn-primary" @onclick="MostrarFormulario">
+            <i class="fas fa-plus"></i> Agregar Variable
+        </button>
+    </div>
+}
 
 @if (mostrarAlerta)
 {
@@ -47,12 +50,18 @@ else
                     <td>@v.FechaCreacion.ToString("yyyy-MM-dd HH:mm:ss")</td>
                     <td>@v.FkEmailUsuario</td>
                     <td>
-                        <button class="btn btn-warning btn-sm me-2" @onclick="() => EditarVariable(v)">
-                            <i class="fas fa-edit"></i> Editar
-                        </button>
-                        <button class="btn btn-danger btn-sm" @onclick="() => EliminarVariable(v.Id)">
-                            <i class="fas fa-trash"></i> Eliminar
-                        </button>
+                        @if (rolPrincipal == "admin" || rolPrincipal == "Validador")
+                        {
+                            <button class="btn btn-warning btn-sm me-2" @onclick="() => EditarVariable(a)">
+                                <i class="fas fa-edit"></i> Editar
+                            </button>
+                        }
+                        @if (rolPrincipal == "admin")
+                        {
+                            <button class="btn btn-danger btn-sm" @onclick="() => EliminarVariable(a.Id)">
+                                <i class="fas fa-trash"></i> Eliminar
+                            </button>
+                        }
                     </td>
                 </tr>
             }
@@ -102,12 +111,19 @@ else
     </div>
 }
 
+@inject ILocalStorageService localStorage
+
 @code {
     private List<Variable> variables = new();
     private Variable variable = new();
     private bool mostrarFormulario = false;
     private string? mensajeAlerta;
     private bool mostrarAlerta = false;
+    private string rolPrincipal = string.Empty;
+    protected override async Task OnInitializedAsync()
+    {
+        rolPrincipal = await localStorage.GetItemAsStringAsync("rolPrincipal");
+    }
 
     [Inject] private IRepository Repository { get; set; } = null!;
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;

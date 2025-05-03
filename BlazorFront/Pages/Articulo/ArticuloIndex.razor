@@ -1,11 +1,14 @@
 @page "/Articulo"
 
 <h3 class="text-center mt-4">Gestión de Artículo</h3>
-<div class="d-flex justify-content-end mb-3">
-    <button class="btn btn-primary" @onclick="MostrarFormulario">
-        <i class="fas fa-plus"></i> Agregar Artículo
-    </button>
-</div>
+@if (rolPrincipal == "admin")
+{
+    <div class="d-flex justify-content-end mb-3">
+        <button class="btn btn-primary" @onclick="MostrarFormulario">
+            <i class="fas fa-plus"></i> Agregar Artículo
+        </button>
+    </div>
+}
 
 @if (mostrarAlerta)
 {
@@ -49,12 +52,18 @@ else
                     <td>@a.FkIdSeccion</td>
                     <td>@a.FkIdSubseccion</td>
                     <td>
-                        <button class="btn btn-warning btn-sm me-2" @onclick="() => EditarArticulo(a)">
-                            <i class="fas fa-edit"></i> Editar
-                        </button>
-                        <button class="btn btn-danger btn-sm" @onclick="() => EliminarArticulo(a.Id)">
-                            <i class="fas fa-trash"></i> Eliminar
-                        </button>
+                        @if (rolPrincipal == "admin" || rolPrincipal == "Validador")
+                        {
+                            <button class="btn btn-warning btn-sm me-2" @onclick="() => EditarArticulo(a)">
+                                <i class="fas fa-edit"></i> Editar
+                            </button>
+                        }
+                        @if (rolPrincipal == "admin")
+                        {
+                            <button class="btn btn-danger btn-sm" @onclick="() => EliminarArticulo(a.Id)">
+                                <i class="fas fa-trash"></i> Eliminar
+                            </button>
+                        }
                     </td>
                 </tr>
             }
@@ -68,7 +77,8 @@ else
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">@(string.IsNullOrEmpty(articulo.Id) ? "Agregar Artículo" : "Editar Artículo")</h5>
+                    <h5 class="modal-title">@(string.IsNullOrEmpty(articulo.Id) ? "Agregar Artículo" : "Editar Artículo")
+                    </h5>
                     <button type="button" class="btn-close" @onclick="Cancelar"></button>
                 </div>
                 <div class="modal-body">
@@ -108,12 +118,21 @@ else
     </div>
 }
 
+@inject ILocalStorageService localStorage
+
 @code {
     private List<Articulo> articulos = new();
     private Articulo articulo = new();
     private bool mostrarFormulario = false;
     private string? mensajeAlerta;
     private bool mostrarAlerta = false;
+
+    private string rolPrincipal = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        rolPrincipal = await localStorage.GetItemAsStringAsync("rolPrincipal");
+    }
 
     [Inject] private IRepository Repository { get; set; } = null!;
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
