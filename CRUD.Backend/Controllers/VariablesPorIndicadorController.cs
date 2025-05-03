@@ -1,6 +1,5 @@
 using CRUD.Backend.Data;
 using CRUD.Shared;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,21 +19,14 @@ namespace CRUD.Backend.Controllers
         [HttpGet]
         public async Task<ActionResult> GetAsync()
         {
-            return Ok(await _context.VariablesPorIndicador.ToListAsync());
-        }
-
-        [HttpPost]
-        public async Task<ActionResult> PostAsync(VariablesPorIndicador variablePorIndicador)
-        {
             try
             {
-                _context.VariablesPorIndicador.Add(variablePorIndicador);
-                await _context.SaveChangesAsync();
-                return Ok(variablePorIndicador);
-            }
-            catch (DbUpdateException ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.InnerException?.Message ?? ex.Message);
+                // Realiza la consulta asincrónica directamente antes de AsEnumerable()
+                var lista = await _context.VariablesPorIndicador
+                    .FromSqlRaw("EXEC sp_ObtenerVariablesPorIndicador")
+                    .ToListAsync();  // Realiza la operación asincrónica aquí, antes de AsEnumerable()
+
+                return Ok(lista);
             }
             catch (Exception ex)
             {
@@ -45,38 +37,66 @@ namespace CRUD.Backend.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult> GetAsync(int id)
         {
-            var variablePorIndicador = await _context.VariablesPorIndicador.FindAsync(id);
-            if (variablePorIndicador == null)
+            try
             {
-                return NotFound();
+                var registros = await _context.VariablesPorIndicador
+                    .FromSqlRaw("EXEC sp_ObtenerVariablePorIndicador @p0", id)
+                    .ToListAsync();
+
+                var registro = registros.FirstOrDefault();
+
+                if (registro == null)
+                    return NotFound();
+
+                return Ok(registro);
             }
-            return Ok(variablePorIndicador);
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> PostAsync(VariablesPorIndicador vpi)
+        {
+            try
+            {
+                await _context.Database.ExecuteSqlRawAsync(
+                    "EXEC sp_InsertarVariablePorIndicador @p0, @p1, @p2, @p3, @p4",
+                    vpi.FkIdVariable,
+                    vpi.FkIdIndicador,
+                    vpi.Dato,
+                    vpi.FkEmailUsuario,
+                    vpi.FechaDato
+                );
+
+                return Ok(vpi);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult> PutAsync(int id, VariablesPorIndicador variablePorIndicador)
+        public async Task<ActionResult> PutAsync(int id, VariablesPorIndicador vpi)
         {
-            if (id != variablePorIndicador.Id)
-            {
-                return BadRequest();
-            }
-
-            var existente = await _context.VariablesPorIndicador.FindAsync(id);
-            if (existente == null)
-            {
-                return NotFound();
-            }
-
-            _context.Entry(existente).CurrentValues.SetValues(variablePorIndicador);
+            if (id != vpi.Id)
+                return BadRequest("ID no coincide.");
 
             try
             {
-                await _context.SaveChangesAsync();
-                return Ok(variablePorIndicador);
-            }
-            catch (DbUpdateConcurrencyException ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.InnerException?.Message ?? ex.Message);
+                await _context.Database.ExecuteSqlRawAsync(
+                    "EXEC sp_ActualizarVariablePorIndicador @p0, @p1, @p2, @p3, @p4, @p5",
+                    vpi.Id,
+                    vpi.FkIdVariable,
+                    vpi.FkIdIndicador,
+                    vpi.Dato,
+                    vpi.FkEmailUsuario,
+                    vpi.FechaDato
+                );
+
+                return Ok(vpi);
             }
             catch (Exception ex)
             {
@@ -87,14 +107,18 @@ namespace CRUD.Backend.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteAsync(int id)
         {
-            var variablePorIndicador = await _context.VariablesPorIndicador.FindAsync(id);
-            if (variablePorIndicador == null)
+            try
             {
-                return NotFound();
+                await _context.Database.ExecuteSqlRawAsync(
+                    "EXEC sp_EliminarVariablePorIndicador @p0", id
+                );
+
+                return Ok();
             }
-            _context.VariablesPorIndicador.Remove(variablePorIndicador);
-            await _context.SaveChangesAsync();
-            return Ok();
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
         }
     }
 }
