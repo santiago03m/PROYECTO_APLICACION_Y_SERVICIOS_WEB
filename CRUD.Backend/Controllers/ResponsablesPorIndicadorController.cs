@@ -1,6 +1,5 @@
 using CRUD.Backend.Data;
 using CRUD.Shared;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,21 +19,12 @@ namespace CRUD.Backend.Controllers
         [HttpGet]
         public async Task<ActionResult> GetAsync()
         {
-            return Ok(await _context.ResponsablesPorIndicador.ToListAsync());
-        }
-
-        [HttpPost]
-        public async Task<ActionResult> PostAsync(ResponsablesPorIndicador ResponsablesPorIndicador)
-        {
             try
             {
-                _context.ResponsablesPorIndicador.Add(ResponsablesPorIndicador);
-                await _context.SaveChangesAsync();
-                return Ok(ResponsablesPorIndicador);
-            }
-            catch (DbUpdateException ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.InnerException!.Message);
+                var lista = await _context.ResponsablesPorIndicador
+                    .FromSqlRaw("EXEC sp_ObtenerResponsablesPorIndicador")
+                    .ToListAsync();  
+                return Ok(lista);
             }
             catch (Exception ex)
             {
@@ -45,39 +35,36 @@ namespace CRUD.Backend.Controllers
         [HttpGet("{fkidresponsable}/{fkidindicador}")]
         public async Task<ActionResult> GetAsync(string fkidresponsable, int fkidindicador)
         {
-            var ResponsablesPorIndicador = await _context.ResponsablesPorIndicador
-                .FindAsync(fkidresponsable, fkidindicador);
-            if (ResponsablesPorIndicador == null)
-            {
-                return NotFound();
-            }
-            return Ok(ResponsablesPorIndicador);
-        }
-
-        [HttpPut("{fkidresponsable}/{fkidindicador}")]
-        public async Task<ActionResult> PutAsync(string fkidresponsable, int fkidindicador, ResponsablesPorIndicador ResponsablesPorIndicador)
-        {
-            if (fkidresponsable != ResponsablesPorIndicador.FkIdResponsable || fkidindicador != ResponsablesPorIndicador.FkIdIndicador)
-            {
-                return BadRequest();
-            }
-
-            var existente = await _context.ResponsablesPorIndicador.FindAsync(fkidresponsable, fkidindicador);
-            if (existente == null)
-            {
-                return NotFound();
-            }
-
-            _context.Entry(existente).CurrentValues.SetValues(ResponsablesPorIndicador);
-
             try
             {
-                await _context.SaveChangesAsync();
-                return Ok(ResponsablesPorIndicador);
+                var resultados = await _context.ResponsablesPorIndicador
+                    .FromSqlRaw("EXEC sp_ObtenerResponsablePorIndicador @p0, @p1", fkidresponsable, fkidindicador)
+                    .AsNoTracking()
+                    .ToListAsync();  
+
+                var resultado = resultados.FirstOrDefault();  
+
+                if (resultado == null)
+                    return NotFound();
+
+                return Ok(resultado);
             }
-            catch (DbUpdateConcurrencyException ex)
+            catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.InnerException!.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        [HttpPost]
+        public async Task<ActionResult> PostAsync(ResponsablesPorIndicador rpi)
+        {
+            try
+            {
+                await _context.Database.ExecuteSqlRawAsync(
+                    "EXEC sp_InsertarResponsablePorIndicador @p0, @p1",
+                    rpi.FkIdResponsable, rpi.FkIdIndicador
+                );
+                return Ok(rpi);
             }
             catch (Exception ex)
             {
@@ -88,14 +75,27 @@ namespace CRUD.Backend.Controllers
         [HttpDelete("{fkidresponsable}/{fkidindicador}")]
         public async Task<ActionResult> DeleteAsync(string fkidresponsable, int fkidindicador)
         {
-            var ResponsablesPorIndicador = await _context.ResponsablesPorIndicador.FindAsync(fkidresponsable, fkidindicador);
-            if (ResponsablesPorIndicador == null)
+            try
             {
-                return NotFound();
+                await _context.Database.ExecuteSqlRawAsync(
+                    "EXEC sp_EliminarResponsablePorIndicador @p0, @p1",
+                    fkidresponsable, fkidindicador
+                );
+                return Ok();
             }
-            _context.ResponsablesPorIndicador.Remove(ResponsablesPorIndicador);
-            await _context.SaveChangesAsync();
-            return Ok();
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        [HttpPut("{fkidresponsable}/{fkidindicador}")]
+        public Task<ActionResult> PutAsync(string fkidresponsable, int fkidindicador, ResponsablesPorIndicador rpi)
+        {
+            // No se requiere actualizar esta tabla intermedia
+            return Task.FromResult<ActionResult>(
+                BadRequest("Esta tabla no permite actualización, solo inserción y eliminación.")
+            );
         }
     }
 }
