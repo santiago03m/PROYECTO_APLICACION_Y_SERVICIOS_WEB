@@ -1,0 +1,49 @@
+@page "/login"
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@using CRUD.Shared
+@using System.Net.Http.Json
+@inject ILocalStorageService localStorage
+
+<h3>Iniciar Sesión</h3>
+
+<EditForm Model="loginModel" OnValidSubmit="HandleLogin">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <InputText @bind-Value="loginModel.Email" Placeholder="Correo" class="form-control" />
+    <InputText @bind-Value="loginModel.Contrasena" Placeholder="Contraseña" type="password" class="form-control" />
+
+    <button class="btn btn-primary" type="submit">Ingresar</button>
+</EditForm>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="text-danger">@errorMessage</div>
+}
+
+@code {
+    private LoginRequest loginModel = new();
+    private string? errorMessage;
+
+    private async Task HandleLogin()
+    {
+        var response = await Http.PostAsJsonAsync("api/auth/login", loginModel);
+        var result = await response.Content.ReadFromJsonAsync<LoginResponse>();
+
+        if (result != null && result.Exito)
+        {
+            errorMessage = string.Empty;
+
+            // Guardar el Rol Principal en el Local Storage
+            await localStorage.SetItemAsync("rolPrincipal", result.RolPrincipal);
+
+            // Redirigir al usuario al sistema de gestión
+            NavigationManager.NavigateTo("/home");
+        }
+        else
+        {
+            errorMessage = result?.Mensaje ?? "Error desconocido";
+        }
+    }
+}
