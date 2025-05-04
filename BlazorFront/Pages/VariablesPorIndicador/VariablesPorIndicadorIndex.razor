@@ -76,11 +76,23 @@ else
                     <EditForm Model="variable" OnValidSubmit="GuardarVariable">
                         <div class="mb-3">
                             <label class="form-label">ID Variable:</label>
-                            <InputNumber class="form-control" @bind-Value="variable.FkIdVariable" required />
+                            <InputSelect class="form-select" @bind-Value="variable.FkIdVariable" required>
+                                <option disabled value="">-- Seleccione --</option>
+                                @foreach (var v in variablesDisponibles)
+                                {
+                                    <option value="@v.Id">@v.Nombre</option>
+                                }
+                            </InputSelect>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">ID Indicador:</label>
-                            <InputNumber class="form-control" @bind-Value="variable.FkIdIndicador" required />
+                            <InputSelect class="form-select" @bind-Value="variable.FkIdIndicador" required>
+                                <option disabled value="">-- Seleccione --</option>
+                                @foreach (var i in indicadoresDisponibles)
+                                {
+                                    <option value="@i.Id">@i.Nombre</option>
+                                }
+                            </InputSelect>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Dato:</label>
@@ -112,6 +124,8 @@ else
 @code {
     private List<VariablesPorIndicador> variablesPorIndicador = new();
     private VariablesPorIndicador variable = new();
+    private List<Variable> variablesDisponibles = new();
+    private List<Indicador> indicadoresDisponibles = new();
     private bool mostrarFormulario = false;
     private string? mensajeAlerta;
     private bool mostrarAlerta = false;
@@ -123,6 +137,8 @@ else
     {
         var url = "api/VariablesPorIndicador";
         variablesPorIndicador = await Repository.GetAsync<List<VariablesPorIndicador>>(url);
+        variablesDisponibles = await Repository.GetAsync<List<Variable>>("api/Variable");
+        indicadoresDisponibles = await Repository.GetAsync<List<Indicador>>("api/Indicador");
     }
 
     private void MostrarFormulario()

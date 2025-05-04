@@ -1,7 +1,9 @@
+using System.Data.Common;
 using CRUD.Backend.Data;
 using CRUD.Shared;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace CRUD.Backend.Controllers
@@ -20,7 +22,30 @@ namespace CRUD.Backend.Controllers
         [HttpGet]
         public async Task<ActionResult> GetAsync()
         {
-            return Ok(await _context.FuentesPorIndicador.ToListAsync());
+            try
+            {
+                var fuentes = await _context.FuentesPorIndicador
+                    .FromSqlRaw("EXEC sp_ObtenerTodasLasFuentesPorIndicador")
+                    .ToListAsync();
+
+                return Ok(fuentes);
+            }
+            catch (SqlException ex)
+            {
+                return StatusCode(500, $"Error de base de datos: {ex.Message}");
+            }
+            catch (InvalidOperationException ex)
+            {
+                return StatusCode(500, $"Operación inválida: {ex.Message}");
+            }
+            catch (DbException ex)
+            {
+                return StatusCode(500, $"Error de acceso a datos: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Ocurrió un error inesperado: {ex.Message}");
+            }
         }
 
         [HttpPost]
@@ -28,8 +53,11 @@ namespace CRUD.Backend.Controllers
         {
             try
             {
-                _context.FuentesPorIndicador.Add(fpi);
-                await _context.SaveChangesAsync();
+                var fkidfuenteParam = new SqlParameter("@fkidfuente", fpi.FkIdFuente);
+                var fkidindicadorParam = new SqlParameter("@fkidindicador", fpi.FkIdIndicador);
+
+                await _context.Database.ExecuteSqlRawAsync("EXEC sp_InsertarFuentePorIndicador @fkidfuente, @fkidindicador", fkidfuenteParam, fkidindicadorParam);
+
                 return Ok(fpi);
             }
             catch (DbUpdateException ex)
@@ -45,56 +73,70 @@ namespace CRUD.Backend.Controllers
         [HttpGet("{fkidfuente}/{fkidindicador}")]
         public async Task<ActionResult> GetAsync(int fkidfuente, int fkidindicador)
         {
-            var fpi = await _context.FuentesPorIndicador.FindAsync(fkidfuente, fkidindicador);
-            if (fpi == null)
-            {
-                return NotFound();
-            }
-            return Ok(fpi);
-        }
-
-        [HttpPut("{fkidfuente}/{fkidindicador}")]
-        public async Task<ActionResult> PutAsync(int fkidfuente, int fkidindicador, FuentePorIndicador fpi)
-        {
-            if (fkidfuente != fpi.FkIdFuente || fkidindicador != fpi.FkIdIndicador)
-            {
-                return BadRequest();
-            }
-
-            var fpiExistente = await _context.FuentesPorIndicador.FindAsync(fkidfuente, fkidindicador);
-            if (fpiExistente == null)
-            {
-                return NotFound();
-            }
-
-            _context.Entry(fpiExistente).CurrentValues.SetValues(fpi);
-
             try
             {
-                await _context.SaveChangesAsync();
-                return Ok(fpi);
+                var resultados = await _context.FuentesPorIndicador
+                    .FromSqlRaw("EXEC sp_ObtenerFuentePorIndicador @fkidfuente = {0}, @fkidindicador = {1}", fkidfuente, fkidindicador)
+                    .AsNoTracking()
+                    .ToListAsync();
+
+                var fuente = resultados.FirstOrDefault();
+
+                if (fuente == null)
+                    return NotFound();
+
+                return Ok(fuente);
             }
-            catch (DbUpdateConcurrencyException ex)
+            catch (SqlException ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.InnerException!.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Error en la base de datos: {ex.Message}");
+            }
+            catch (InvalidOperationException ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Error en la operación: {ex.Message}");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Error inesperado: {ex.Message}");
             }
+        }
+
+        [HttpPut("{fkidfuente}/{fkidindicador}")]
+        public Task<ActionResult> PutAsync(int fkidfuente, int fkidindicador, FuentePorIndicador fuentePorIndicador)
+        {
+            // No se requiere actualizar esta tabla intermedia
+            return Task.FromResult<ActionResult>(
+                BadRequest("Esta tabla no permite actualización, solo inserción y eliminación.")
+            );
         }
 
         [HttpDelete("{fkidfuente}/{fkidindicador}")]
         public async Task<ActionResult> DeleteAsync(int fkidfuente, int fkidindicador)
         {
-            var fpi = await _context.FuentesPorIndicador.FindAsync(fkidfuente, fkidindicador);
-            if (fpi == null)
+            try
             {
-                return NotFound();
+                var fkidfuenteParam = new SqlParameter("@fkidfuente", fkidfuente);
+                var fkidindicadorParam = new SqlParameter("@fkidindicador", fkidindicador);
+
+                await _context.Database.ExecuteSqlRawAsync(
+                    "EXEC sp_EliminarFuentePorIndicador @fkidfuente, @fkidindicador",
+                    fkidfuenteParam, fkidindicadorParam);
+
+                return Ok("Fuente eliminada exitosamente.");
             }
-            _context.FuentesPorIndicador.Remove(fpi);
-            await _context.SaveChangesAsync();
-            return Ok();
+            catch (SqlException ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Error en la base de datos: {ex.Message}");
+            }
+            catch (DbUpdateException ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Error al eliminar los datos: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Error inesperado: {ex.Message}");
+            }
+
         }
     }
 }

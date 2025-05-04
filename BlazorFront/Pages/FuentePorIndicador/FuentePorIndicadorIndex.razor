@@ -48,7 +48,8 @@ else
                         <button class="btn btn-warning btn-sm me-2" @onclick="() => EditarRelacion(rel)">
                             <i class="fas fa-edit"></i> Editar
                         </button>
-                        <button class="btn btn-danger btn-sm" @onclick="() => EliminarRelacion(rel.FkIdFuente, rel.FkIdIndicador)">
+                        <button class="btn btn-danger btn-sm"
+                            @onclick="() => EliminarRelacion(rel.FkIdFuente, rel.FkIdIndicador)">
                             <i class="fas fa-trash"></i> Eliminar
                         </button>
                     </td>
@@ -71,11 +72,23 @@ else
                     <EditForm Model="relacion" OnValidSubmit="GuardarRelacion">
                         <div class="mb-3">
                             <label class="form-label">ID Fuente:</label>
-                            <InputNumber class="form-control" @bind-Value="relacion.FkIdFuente" required />
+                            <InputSelect class="form-control" @bind-Value="relacion.FkIdFuente" required>
+                                <option value="">Seleccione una fuente</option>
+                                @foreach (var fuente in fuentesDisponibles)
+                                {
+                                    <option value="@fuente.Id">@fuente.Nombre</option>
+                                }
+                            </InputSelect>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">ID Indicador:</label>
-                            <InputNumber class="form-control" @bind-Value="relacion.FkIdIndicador" required />
+                            <InputSelect class="form-control" @bind-Value="relacion.FkIdIndicador" required>
+                                <option value="">Seleccione un indicador</option>
+                                @foreach (var indicador in indicadoresDisponibles)
+                                {
+                                    <option value="@indicador.Id">@indicador.Nombre</option>
+                                }
+                            </InputSelect>
                         </div>
                         <div class="d-flex justify-content-end">
                             <button type="submit" class="btn btn-success me-2">
@@ -94,6 +107,8 @@ else
 
 @code {
     private List<FuentePorIndicador> fuentesPorIndicador = new();
+    private List<Indicador> indicadoresDisponibles = new();
+    private List<Fuente> fuentesDisponibles = new();
     private FuentePorIndicador relacion = new();
     private bool mostrarFormulario = false;
     private bool esNuevo = true;
@@ -107,6 +122,8 @@ else
     {
         var url = "api/FuentePorIndicador";
         fuentesPorIndicador = await Repository.GetAsync<List<FuentePorIndicador>>(url);
+        fuentesDisponibles = await Repository.GetAsync<List<Fuente>>("api/Fuente");
+        indicadoresDisponibles = await Repository.GetAsync<List<Indicador>>("api/Indicador");
     }
 
     private void MostrarFormulario()
@@ -129,18 +146,30 @@ else
 
     private async Task GuardarRelacion()
     {
-        var url = "api/FuentePorIndicador";
-        var compositeKey = $"{relacion.FkIdFuente}/{relacion.FkIdIndicador}";
-        var urlPut = $"api/FuentePorIndicador/{compositeKey}";
+        mostrarFormulario = false;
+        var url1 = "api/FuentePorIndicador";
 
         if (esNuevo)
-            await Repository.PostAsync(url, relacion);
+        {
+            var existe = fuentesPorIndicador.Any(f =>
+            f.FkIdFuente == relacion.FkIdFuente &&
+            f.FkIdIndicador == relacion.FkIdIndicador);
+            if (!existe)
+            {
+                await Repository.PostAsync(url1, relacion);
+                fuentesPorIndicador = await Repository.GetAsync<List<FuentePorIndicador>>(url1);
+                mensajeAlerta = "Relación guardada correctamente";
+            }
+            else
+            {
+                mensajeAlerta = "La relación ya existe";
+            }
+        }
         else
-            await Repository.PutAsync(urlPut, relacion);
-
-        fuentesPorIndicador = await Repository.GetAsync<List<FuentePorIndicador>>(url);
-        mostrarFormulario = false;
-        mensajeAlerta = "Relación guardada correctamente";
+        {
+            mensajeAlerta = "Esta tabla no adimite modificaciones";
+        }
+        fuentesPorIndicador = await Repository.GetAsync<List<FuentePorIndicador>>(url1);
         mostrarAlerta = true;
     }
 

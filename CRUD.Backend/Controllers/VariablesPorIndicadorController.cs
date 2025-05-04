@@ -1,7 +1,8 @@
+using System.Data.Common;
 using CRUD.Backend.Data;
 using CRUD.Shared;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace CRUD.Backend.Controllers
@@ -20,7 +21,31 @@ namespace CRUD.Backend.Controllers
         [HttpGet]
         public async Task<ActionResult> GetAsync()
         {
-            return Ok(await _context.VariablesPorIndicador.ToListAsync());
+            try
+            {
+                // Realiza la consulta asincrónica directamente antes de AsEnumerable()
+                var lista = await _context.VariablesPorIndicador
+                    .FromSqlRaw("EXEC sp_ObtenerVariablesPorIndicador")
+                    .ToListAsync();  // Realiza la operación asincrónica aquí, antes de AsEnumerable()
+
+                return Ok(lista);
+            }
+            catch (SqlException ex)
+            {
+                return StatusCode(500, $"Error de base de datos: {ex.Message}");
+            }
+            catch (InvalidOperationException ex)
+            {
+                return StatusCode(500, $"Operación inválida: {ex.Message}");
+            }
+            catch (DbException ex)
+            {
+                return StatusCode(500, $"Error de acceso a datos: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Ocurrió un error inesperado: {ex.Message}");
+            }
         }
 
         [HttpPost]
@@ -28,13 +53,20 @@ namespace CRUD.Backend.Controllers
         {
             try
             {
-                _context.VariablesPorIndicador.Add(variablePorIndicador);
-                await _context.SaveChangesAsync();
+                await _context.Database.ExecuteSqlRawAsync(
+                    "EXEC sp_InsertarVariablePorIndicador @p0, @p1, @p2, @p3, @p4",
+                    variablePorIndicador.FkIdVariable,
+                    variablePorIndicador.FkIdIndicador,
+                    variablePorIndicador.Dato,
+                    variablePorIndicador.FkEmailUsuario,
+                    variablePorIndicador.FechaDato
+                );
+
                 return Ok(variablePorIndicador);
             }
             catch (DbUpdateException ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.InnerException?.Message ?? ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.InnerException!.Message);
             }
             catch (Exception ex)
             {
@@ -45,56 +77,90 @@ namespace CRUD.Backend.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult> GetAsync(int id)
         {
-            var variablePorIndicador = await _context.VariablesPorIndicador.FindAsync(id);
-            if (variablePorIndicador == null)
+            try
             {
-                return NotFound();
+                var registros = await _context.VariablesPorIndicador
+                    .FromSqlRaw("EXEC sp_ObtenerVariablePorIndicador @p0", id)
+                    .ToListAsync();
+
+                var registro = registros.FirstOrDefault();
+
+                if (registro == null)
+                    return NotFound();
+
+                return Ok(registro);
             }
-            return Ok(variablePorIndicador);
+            catch (SqlException ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Error en la base de datos: {ex.Message}");
+            }
+            catch (InvalidOperationException ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Error en la operación: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Error inesperado: {ex.Message}");
+            }
         }
 
         [HttpPut("{id}")]
         public async Task<ActionResult> PutAsync(int id, VariablesPorIndicador variablePorIndicador)
         {
             if (id != variablePorIndicador.Id)
-            {
-                return BadRequest();
-            }
-
-            var existente = await _context.VariablesPorIndicador.FindAsync(id);
-            if (existente == null)
-            {
-                return NotFound();
-            }
-
-            _context.Entry(existente).CurrentValues.SetValues(variablePorIndicador);
+                return BadRequest("El ID de la URL no coincide con el del cuerpo.");
 
             try
             {
-                await _context.SaveChangesAsync();
-                return Ok(variablePorIndicador);
+                var parameters = new[]
+                {
+                new SqlParameter("@id", variablePorIndicador.Id),
+                new SqlParameter("@fkidvariable", variablePorIndicador.FkIdVariable),
+                new SqlParameter("@fkidindicador", variablePorIndicador.FkIdIndicador),
+                new SqlParameter("@dato", variablePorIndicador.Dato),
+                new SqlParameter("@fkemailusuario", variablePorIndicador.FkEmailUsuario),
+                new SqlParameter("@fechadato", variablePorIndicador.FechaDato)
+                };
+
+                await _context.Database.ExecuteSqlRawAsync(
+                    "EXEC sp_ActualizarVariablePorIndicador @id, @fkidvariable, @fkidindicador, @dato, @fkemailusuario, @fechadato",
+                    parameters);
+
+                return Ok("Variable actualizada correctamente.");
             }
-            catch (DbUpdateConcurrencyException ex)
+            catch (SqlException ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.InnerException?.Message ?? ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Error SQL: {ex.Message}");
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Error inesperado: {ex.Message}");
             }
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteAsync(int id)
         {
-            var variablePorIndicador = await _context.VariablesPorIndicador.FindAsync(id);
-            if (variablePorIndicador == null)
+            try
             {
-                return NotFound();
+                await _context.Database.ExecuteSqlRawAsync(
+                    "EXEC sp_EliminarVariablePorIndicador @p0", id
+                );
+
+                return Ok();
             }
-            _context.VariablesPorIndicador.Remove(variablePorIndicador);
-            await _context.SaveChangesAsync();
-            return Ok();
+            catch (SqlException ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Error en la base de datos: {ex.Message}");
+            }
+            catch (DbUpdateException ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Error al eliminar los datos: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Error inesperado: {ex.Message}");
+            }
         }
     }
 }
