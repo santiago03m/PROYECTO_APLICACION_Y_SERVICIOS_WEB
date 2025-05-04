@@ -87,11 +87,23 @@ else
                         </div>
                         <div class="mb-3">
                             <label class="form-label">ID Sección:</label>
-                            <InputText class="form-control" @bind-Value="articulo.FkIdSeccion" required />
+                            <InputSelect class="form-select" @bind-Value="articulo.FkIdSeccion" required>
+                                <option disabled value="">-- Seleccione --</option>
+                                @foreach (var s in seccionesDisponibles)
+                                {
+                                    <option value="@s.Id">@s.Nombre</option>
+                                }
+                            </InputSelect>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">ID Subsección:</label>
-                            <InputText class="form-control" @bind-Value="articulo.FkIdSubseccion" required />
+                            <InputSelect class="form-select" @bind-Value="articulo.FkIdSubseccion" required>
+                                <option disabled value="">-- Seleccione --</option>
+                                @foreach (var ss in subseccionesDisponibles)
+                                {
+                                    <option value="@ss.Id">@ss.Nombre</option>
+                                }
+                            </InputSelect>
                         </div>
                         <div class="d-flex justify-content-end">
                             <button type="submit" class="btn btn-success me-2">
@@ -110,6 +122,8 @@ else
 
 @code {
     private List<Articulo> articulos = new();
+    private List<Seccion> seccionesDisponibles = new();
+    private List<SubSeccion> subseccionesDisponibles = new();
     private Articulo articulo = new();
     private bool mostrarFormulario = false;
     private string? mensajeAlerta;
@@ -122,6 +136,8 @@ else
     {
         var url = "api/Articulo";
         articulos = await Repository.GetAsync<List<Articulo>>(url);
+        seccionesDisponibles = await Repository.GetAsync<List<Seccion>>("api/Seccion");
+        subseccionesDisponibles = await Repository.GetAsync<List<SubSeccion>>("api/Subseccion");
     }
 
     private void MostrarFormulario()
@@ -145,6 +161,7 @@ else
 
     private async Task GuardarArticulo()
     {
+        mostrarFormulario = false;
         var url1 = "api/Articulo";
         var url2 = $"api/Articulo/{articulo.Id}";
 
@@ -154,13 +171,16 @@ else
         var existe = articulos.Any(a => a.Id == articulo.Id);
 
         if (!existe)
+        {
             await Repository.PostAsync(url1, articulo);
+            mensajeAlerta = "Artículo guardado correctamente";
+        }
         else
+        {
             await Repository.PutAsync(url2, articulo);
-
+            mensajeAlerta = "Artículo actualizado correctamente";
+        }
         articulos = await Repository.GetAsync<List<Articulo>>(url1);
-        mostrarFormulario = false;
-        mensajeAlerta = "Artículo guardado correctamente";
         mostrarAlerta = true;
     }
 

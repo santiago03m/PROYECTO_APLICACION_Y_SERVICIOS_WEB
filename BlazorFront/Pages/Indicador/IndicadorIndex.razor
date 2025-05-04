@@ -118,11 +118,23 @@ else
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Tipo Indicador (ID):</label>
-                            <InputNumber class="form-control" @bind-Value="indicador.FkIdTipoIndicador" />
+                            <InputSelect class="form-select" @bind-Value="indicador.FkIdTipoIndicador" required>
+                                <option disabled value="">-- Seleccione --</option>
+                                @foreach (var t in tiposIndicadoresDisponibles)
+                                {
+                                    <option value="@t.Id">@t.Nombre</option>
+                                }
+                            </InputSelect>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Unidad Medición (ID):</label>
-                            <InputNumber class="form-control" @bind-Value="indicador.FkIdUnidadMedicion" />
+                            <InputSelect class="form-select" @bind-Value="indicador.FkIdUnidadMedicion" required>
+                                <option disabled value="">-- Seleccione --</option>
+                                @foreach (var u in unidadesMedicionDisponibles)
+                                {
+                                    <option value="@u.Id">@u.Descripcion</option>
+                                }
+                            </InputSelect>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Meta:</label>
@@ -130,27 +142,63 @@ else
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Sentido (ID):</label>
-                            <InputNumber class="form-control" @bind-Value="indicador.FkIdSentido" />
+                            <InputSelect class="form-select" @bind-Value="indicador.FkIdSentido" required>
+                                <option disabled value="">-- Seleccione --</option>
+                                @foreach (var s in sentidosDisponibles)
+                                {
+                                    <option value="@s.Id">@s.Nombre</option>
+                                }
+                            </InputSelect>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Frecuencia (ID):</label>
-                            <InputNumber class="form-control" @bind-Value="indicador.FkIdFrecuencia" />
+                            <InputSelect class="form-select" @bind-Value="indicador.FkIdFrecuencia" required>
+                                <option disabled value="">-- Seleccione --</option>
+                                @foreach (var f in frecuenciasDisponibles)
+                                {
+                                    <option value="@f.Id">@f.Nombre</option>
+                                }
+                            </InputSelect>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Artículo (FK):</label>
-                            <InputText class="form-control" @bind-Value="indicador.FkIdArticulo" />
+                            <InputSelect class="form-select" @bind-Value="indicador.FkIdArticulo" required>
+                                <option disabled value="">-- Seleccione --</option>
+                                @foreach (var a in articulosDisponibles)
+                                {
+                                    <option value="@a.Id">@a.Nombre</option>
+                                }
+                            </InputSelect>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Literal (FK):</label>
-                            <InputText class="form-control" @bind-Value="indicador.FkIdLiteral" />
+                            <InputSelect class="form-select" @bind-Value="indicador.FkIdLiteral" required>
+                                <option disabled value="">-- Seleccione --</option>
+                                @foreach (var l in literalesDisponibles)
+                                {
+                                    <option value="@l.Id">@l.Descripcion</option>
+                                }
+                            </InputSelect>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Numeral (FK):</label>
-                            <InputText class="form-control" @bind-Value="indicador.FkIdNumeral" />
+                            <InputSelect class="form-select" @bind-Value="indicador.FkIdNumeral" required>
+                                <option disabled value="">-- Seleccione --</option>
+                                @foreach (var n in numeralesDisponibles)
+                                {
+                                    <option value="@n.Id">@n.Descripcion</option>
+                                }
+                            </InputSelect>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Parágrafo (FK):</label>
-                            <InputText class="form-control" @bind-Value="indicador.FkIdParagrafo" />
+                            <InputSelect class="form-select" @bind-Value="indicador.FkIdParagrafo" required>
+                                <option disabled value="">-- Seleccione --</option>
+                                @foreach (var p in paragrafosDisponibles)
+                                {
+                                    <option value="@p.Id">@p.Descripcion</option>
+                                }
+                            </InputSelect>
                         </div>
                         <div class="d-flex justify-content-end">
                             <button type="submit" class="btn btn-success me-2">
@@ -170,6 +218,14 @@ else
 
 @code {
     private List<Indicador> indicadores = new();
+    private List<TipoIndicador> tiposIndicadoresDisponibles = new();
+    private List<UnidadMedicion> unidadesMedicionDisponibles = new();
+    private List<Sentido> sentidosDisponibles = new();
+    private List<Frecuencia> frecuenciasDisponibles = new();
+    private List<Articulo> articulosDisponibles = new();
+    private List<Literal> literalesDisponibles = new();
+    private List<Numeral> numeralesDisponibles = new();
+    private List<Paragrafo> paragrafosDisponibles = new();
     private Indicador indicador = new();
     private bool mostrarFormulario = false;
     private string? mensajeAlerta;
@@ -182,6 +238,14 @@ else
     {
         var url = "api/Indicador";
         indicadores = await Repository.GetAsync<List<Indicador>>(url);
+        tiposIndicadoresDisponibles = await Repository.GetAsync<List<TipoIndicador>>("api/TipoIndicadores");
+        unidadesMedicionDisponibles = await Repository.GetAsync<List<UnidadMedicion>>("api/UnidadMedicion");
+        sentidosDisponibles = await Repository.GetAsync<List<Sentido>>("api/Sentido");
+        frecuenciasDisponibles = await Repository.GetAsync<List<Frecuencia>>("api/Frecuencia");
+        articulosDisponibles = await Repository.GetAsync<List<Articulo>>("api/Articulo");
+        literalesDisponibles = await Repository.GetAsync<List<Literal>>("api/Literal");
+        numeralesDisponibles = await Repository.GetAsync<List<Numeral>>("api/Numeral");
+        paragrafosDisponibles = await Repository.GetAsync<List<Paragrafo>>("api/Paragrafo");
     }
 
     private void MostrarFormulario()
@@ -198,16 +262,24 @@ else
             Codigo = i.Codigo,
             Nombre = i.Nombre,
             Meta = i.Meta,
+            Objetivo = i.Objetivo,
+            Alcance = i.Alcance,
+            Formula = i.Formula,
             FkIdTipoIndicador = i.FkIdTipoIndicador,
             FkIdUnidadMedicion = i.FkIdUnidadMedicion,
             FkIdSentido = i.FkIdSentido,
-            FkIdFrecuencia = i.FkIdFrecuencia
+            FkIdFrecuencia = i.FkIdFrecuencia,
+            FkIdArticulo = i.FkIdArticulo,
+            FkIdLiteral = i.FkIdLiteral,
+            FkIdNumeral = i.FkIdNumeral,
+            FkIdParagrafo = i.FkIdParagrafo
         };
         mostrarFormulario = true;
     }
 
     private async Task GuardarIndicador()
     {
+        mostrarFormulario = false;
         var url1 = "api/Indicador";
         var url2 = $"api/Indicador/{indicador.Id}";
 
@@ -215,15 +287,15 @@ else
         if (indicador.Id == 0)
         {
             await Repository.PostAsync(url1, indicador);
+            mensajeAlerta = "Indicador guardado correctamente";
         }
         else
         {
             await Repository.PutAsync(url2, indicador);
+            mensajeAlerta = "Indicador actualizado correctamente";
         }
 
         indicadores = await Repository.GetAsync<List<Indicador>>(url1);
-        mostrarFormulario = false;
-        mensajeAlerta = "Indicador guardado correctamente";
         mostrarAlerta = true;
     }
 

@@ -79,7 +79,13 @@ else
                         </div>
                         <div class="mb-3">
                             <label class="form-label">ID Literal:</label>
-                            <InputText class="form-control" @bind-Value="numeral.FkIdLiteral" required />
+                            <InputSelect class="form-select" @bind-Value="numeral.FkIdLiteral" required>
+                                <option disabled value="">-- Seleccione --</option>
+                                @foreach (var l in litelaresDisponibles)
+                                {
+                                    <option value="@l.Id">@l.Descripcion</option>
+                                }
+                            </InputSelect>
                         </div>
                         <div class="d-flex justify-content-end">
                             <button type="submit" class="btn btn-success me-2">
@@ -98,6 +104,7 @@ else
 
 @code {
     private List<Numeral> numerales = new();
+    private List<Literal> litelaresDisponibles = new();
     private Numeral numeral = new();
     private bool mostrarFormulario = false;
     private string? mensajeAlerta;
@@ -109,6 +116,7 @@ else
     protected override async Task OnInitializedAsync()
     {
         numerales = await Repository.GetAsync<List<Numeral>>("api/Numeral");
+        litelaresDisponibles = await Repository.GetAsync<List<Literal>>("api/Literal");
     }
 
     private void MostrarFormulario()

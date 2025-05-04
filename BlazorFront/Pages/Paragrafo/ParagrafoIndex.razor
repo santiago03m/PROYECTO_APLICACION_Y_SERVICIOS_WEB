@@ -79,7 +79,13 @@ else
                         </div>
                         <div class="mb-3">
                             <label class="form-label">ID Artículo:</label>
-                            <InputText class="form-control" @bind-Value="parrafo.FkIdArticulo" required />
+                            <InputSelect class="form-select" @bind-Value="parrafo.FkIdArticulo" required>
+                                <option value="">Seleccione un artículo</option>
+                                @foreach (var articulo in articulosDisponibles)
+                                {
+                                    <option value="@articulo.Id">@articulo.Descripcion</option>
+                                }
+                            </InputSelect>
                         </div>
                         <div class="d-flex justify-content-end">
                             <button type="submit" class="btn btn-success me-2">
@@ -98,6 +104,7 @@ else
 
 @code {
     private List<Paragrafo> parrafos = new();
+    private List<Articulo> articulosDisponibles = new();
     private Paragrafo parrafo = new();
     private bool mostrarFormulario = false;
     private string? mensajeAlerta;
@@ -110,6 +117,7 @@ else
     {
         var url = "api/Paragrafo";
         parrafos = await Repository.GetAsync<List<Paragrafo>>(url);
+        articulosDisponibles = await Repository.GetAsync<List<Articulo>>("api/Articulo");
     }
 
     private void MostrarFormulario()

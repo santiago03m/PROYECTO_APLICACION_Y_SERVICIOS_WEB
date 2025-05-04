@@ -85,7 +85,13 @@ else
                         </div>
                         <div class="mb-3">
                             <label class="form-label">FK Email Usuario:</label>
-                            <InputText class="form-control" @bind-Value="variable.FkEmailUsuario" required />
+                            <InputSelect class="form-select" @bind-Value="variable.FkEmailUsuario" required>
+                                <option disabled value="">-- Seleccione --</option>
+                                @foreach (var u in usuariosDisponibles)
+                                {
+                                    <option value="@u.Email">@u.Email</option>
+                                }
+                            </InputSelect>
                         </div>
                         <div class="d-flex justify-content-end">
                             <button type="submit" class="btn btn-success me-2">
@@ -105,6 +111,7 @@ else
 @code {
     private List<Variable> variables = new();
     private Variable variable = new();
+    private List<Usuario> usuariosDisponibles = new();
     private bool mostrarFormulario = false;
     private string? mensajeAlerta;
     private bool mostrarAlerta = false;
@@ -116,6 +123,7 @@ else
     {
         var url = "api/Variable";
         variables = await Repository.GetAsync<List<Variable>>(url);
+        usuariosDisponibles = await Repository.GetAsync<List<Usuario>>("api/Usuarios");
     }
 
     private void MostrarFormulario()

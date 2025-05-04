@@ -78,38 +78,38 @@ else
                         <InputSelect class="form-select" @bind-Value="responsable.FkIdResponsable" required>
                             <option disabled value="">-- Seleccione --</option>
                             @foreach (var r in responsablesDisponibles)
-                            {
-                                <option value="@r.Id">@r.Nombre</option>
-                            }
-                        </InputSelect>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">ID Indicador:</label>
-                        <InputSelect class="form-select" @bind-Value="responsable.FkIdIndicador" required>
-                            <option disabled value="">-- Seleccione --</option>
-                            @foreach (var i in indicadoresDisponibles)
-                            {
-                                <option value="@i.Id">@i.Nombre</option>
-                            }
-                        </InputSelect>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Fecha Asignación:</label>
-                        <InputDate class="form-control" @bind-Value="responsable.FechaAsignacion" required />
-                    </div>
-                    <div class="d-flex justify-content-end">
-                        <button type="submit" class="btn btn-success me-2">
-                            <i class="fas fa-save"></i> Guardar
-                        </button>
-                        <button type="button" class="btn btn-secondary" @onclick="Cancelar">
-                            <i class="fas fa-times"></i> Cancelar
-                        </button>
-                    </div>
-                </EditForm>
+                                {
+                                    <option value="@r.Id">@r.Nombre</option>
+                                }
+                            </InputSelect>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">ID Indicador:</label>
+                            <InputSelect class="form-select" @bind-Value="responsable.FkIdIndicador" required>
+                                <option disabled value="">-- Seleccione --</option>
+                                @foreach (var i in indicadoresDisponibles)
+                                {
+                                    <option value="@i.Id">@i.Nombre</option>
+                                }
+                            </InputSelect>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Fecha Asignación:</label>
+                            <InputDate class="form-control" @bind-Value="responsable.FechaAsignacion" required />
+                        </div>
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-success me-2">
+                                <i class="fas fa-save"></i> Guardar
+                            </button>
+                            <button type="button" class="btn btn-secondary" @onclick="Cancelar">
+                                <i class="fas fa-times"></i> Cancelar
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
             </div>
         </div>
     </div>
-</div>
 }
 
 @code {
@@ -130,7 +130,7 @@ else
     {
         var url = "api/ResponsablesPorIndicador";
         responsables = await Repository.GetAsync<List<ResponsablesPorIndicador>>(url);
-            responsablesDisponibles = await Repository.GetAsync<List<Actor>>("api/Actor");
+        responsablesDisponibles = await Repository.GetAsync<List<Actor>>("api/Actor");
         indicadoresDisponibles = await Repository.GetAsync<List<Indicador>>("api/Indicador");
     }
 

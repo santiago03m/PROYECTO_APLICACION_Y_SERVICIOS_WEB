@@ -71,11 +71,23 @@ else
                     <EditForm Model="registro" OnValidSubmit="GuardarRegistro">
                         <div class="mb-3">
                             <label class="form-label">ID Indicador:</label>
-                            <InputNumber class="form-control" @bind-Value="registro.FkIdIndicador" required />
+                            <InputSelect class="form-select" @bind-Value="registro.FkIdIndicador" required>
+                                <option value="">Seleccione un Indicador</option>
+                                @foreach (var indicador in indicadores)
+                                {
+                                    <option value="@indicador.Id">@indicador.Nombre</option>
+                                }
+                            </InputSelect>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">ID Representación Visual:</label>
-                            <InputNumber class="form-control" @bind-Value="registro.FkIdRepresenVisual" required />
+                            <InputSelect class="form-select" @bind-Value="registro.FkIdRepresenVisual" required>
+                                <option value="">Seleccione una Representación Visual</option>
+                                @foreach (var representacion in representacionesVisuales)
+                                {
+                                    <option value="@representacion.Id">@representacion.Nombre</option>
+                                }
+                            </InputSelect>
                         </div>
                         <div class="d-flex justify-content-end">
                             <button type="submit" class="btn btn-success me-2">
@@ -94,6 +106,8 @@ else
 
 @code {
     private List<RepresenVisualPorIndicador> registros = new();
+    private List<RepresentacionVisual> representacionesVisuales = new();
+    private List<Indicador> indicadores = new();
     private RepresenVisualPorIndicador registro = new();
     private bool mostrarFormulario = false;
     private string? mensajeAlerta;
@@ -106,6 +120,8 @@ else
     {
         var url = "api/RepresenVisualPorIndicador";
         registros = await Repository.GetAsync<List<RepresenVisualPorIndicador>>(url);
+        representacionesVisuales = await Repository.GetAsync<List<RepresentacionVisual>>("api/RepresentacionVisual");
+        indicadores = await Repository.GetAsync<List<Indicador>>("api/Indicador");
     }
 
     private void MostrarFormulario()
