@@ -1,4 +1,5 @@
 @page "/Indicador"
+@using System.Text.Json
 
 <h3 class="text-center mt-4">Gestión de Indicadores</h3>
 <div class="d-flex justify-content-end mb-3">
@@ -96,109 +97,143 @@ else
                 </div>
                 <div class="modal-body">
                     <EditForm Model="indicador" OnValidSubmit="GuardarIndicador">
-                        <div class="mb-3">
-                            <label class="form-label">Código:</label>
-                            <InputText class="form-control" @bind-Value="indicador.Codigo" required />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Nombre:</label>
-                            <InputText class="form-control" @bind-Value="indicador.Nombre" required />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Objetivo:</label>
-                            <InputTextArea class="form-control" @bind-Value="indicador.Objetivo" />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Alcance:</label>
-                            <InputTextArea class="form-control" @bind-Value="indicador.Alcance" />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Fórmula:</label>
-                            <InputTextArea class="form-control" @bind-Value="indicador.Formula" />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Tipo Indicador (ID):</label>
-                            <InputSelect class="form-select" @bind-Value="indicador.FkIdTipoIndicador" required>
-                                <option disabled value="">-- Seleccione --</option>
-                                @foreach (var t in tiposIndicadoresDisponibles)
-                                {
-                                    <option value="@t.Id">@t.Nombre</option>
-                                }
-                            </InputSelect>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Unidad Medición (ID):</label>
-                            <InputSelect class="form-select" @bind-Value="indicador.FkIdUnidadMedicion" required>
-                                <option disabled value="">-- Seleccione --</option>
-                                @foreach (var u in unidadesMedicionDisponibles)
-                                {
-                                    <option value="@u.Id">@u.Descripcion</option>
-                                }
-                            </InputSelect>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Meta:</label>
-                            <InputText class="form-control" @bind-Value="indicador.Meta" />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Sentido (ID):</label>
-                            <InputSelect class="form-select" @bind-Value="indicador.FkIdSentido" required>
-                                <option disabled value="">-- Seleccione --</option>
-                                @foreach (var s in sentidosDisponibles)
-                                {
-                                    <option value="@s.Id">@s.Nombre</option>
-                                }
-                            </InputSelect>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Frecuencia (ID):</label>
-                            <InputSelect class="form-select" @bind-Value="indicador.FkIdFrecuencia" required>
-                                <option disabled value="">-- Seleccione --</option>
-                                @foreach (var f in frecuenciasDisponibles)
-                                {
-                                    <option value="@f.Id">@f.Nombre</option>
-                                }
-                            </InputSelect>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Artículo (FK):</label>
-                            <InputSelect class="form-select" @bind-Value="indicador.FkIdArticulo" required>
-                                <option disabled value="">-- Seleccione --</option>
-                                @foreach (var a in articulosDisponibles)
-                                {
-                                    <option value="@a.Id">@a.Nombre</option>
-                                }
-                            </InputSelect>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Literal (FK):</label>
-                            <InputSelect class="form-select" @bind-Value="indicador.FkIdLiteral" required>
-                                <option disabled value="">-- Seleccione --</option>
-                                @foreach (var l in literalesDisponibles)
-                                {
-                                    <option value="@l.Id">@l.Descripcion</option>
-                                }
-                            </InputSelect>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Numeral (FK):</label>
-                            <InputSelect class="form-select" @bind-Value="indicador.FkIdNumeral" required>
-                                <option disabled value="">-- Seleccione --</option>
-                                @foreach (var n in numeralesDisponibles)
-                                {
-                                    <option value="@n.Id">@n.Descripcion</option>
-                                }
-                            </InputSelect>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Parágrafo (FK):</label>
-                            <InputSelect class="form-select" @bind-Value="indicador.FkIdParagrafo" required>
-                                <option disabled value="">-- Seleccione --</option>
-                                @foreach (var p in paragrafosDisponibles)
-                                {
-                                    <option value="@p.Id">@p.Descripcion</option>
-                                }
-                            </InputSelect>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="mb-3">
+                                    <label class="form-label">Código:</label>
+                                    <InputText class="form-control" @bind-Value="indicador.Codigo" required />
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Nombre:</label>
+                                    <InputText class="form-control" @bind-Value="indicador.Nombre" required />
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Objetivo:</label>
+                                    <InputTextArea class="form-control" @bind-Value="indicador.Objetivo" />
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Alcance:</label>
+                                    <InputTextArea class="form-control" @bind-Value="indicador.Alcance" />
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Fórmula:</label>
+                                    <InputTextArea class="form-control" @bind-Value="indicador.Formula" />
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Tipo Indicador (ID):</label>
+                                    <InputSelect class="form-select" @bind-Value="indicador.FkIdTipoIndicador" required>
+                                        <option disabled value="">-- Seleccione --</option>
+                                        @foreach (var t in tiposIndicadoresDisponibles)
+                                        {
+                                            <option value="@t.Id">@t.Nombre</option>
+                                        }
+                                    </InputSelect>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Unidad Medición (ID):</label>
+                                    <InputSelect class="form-select" @bind-Value="indicador.FkIdUnidadMedicion" required>
+                                        <option disabled value="">-- Seleccione --</option>
+                                        @foreach (var u in unidadesMedicionDisponibles)
+                                        {
+                                            <option value="@u.Id">@u.Descripcion</option>
+                                        }
+                                    </InputSelect>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Meta:</label>
+                                    <InputText class="form-control" @bind-Value="indicador.Meta" />
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Sentido (ID):</label>
+                                    <InputSelect class="form-select" @bind-Value="indicador.FkIdSentido" required>
+                                        <option disabled value="">-- Seleccione --</option>
+                                        @foreach (var s in sentidosDisponibles)
+                                        {
+                                            <option value="@s.Id">@s.Nombre</option>
+                                        }
+                                    </InputSelect>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Frecuencia (ID):</label>
+                                    <InputSelect class="form-select" @bind-Value="indicador.FkIdFrecuencia" required>
+                                        <option disabled value="">-- Seleccione --</option>
+                                        @foreach (var f in frecuenciasDisponibles)
+                                        {
+                                            <option value="@f.Id">@f.Nombre</option>
+                                        }
+                                    </InputSelect>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Artículo (FK):</label>
+                                    <InputSelect class="form-select" @bind-Value="indicador.FkIdArticulo" required>
+                                        <option disabled value="">-- Seleccione --</option>
+                                        @foreach (var a in articulosDisponibles)
+                                        {
+                                            <option value="@a.Id">@a.Nombre</option>
+                                        }
+                                    </InputSelect>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Literal (FK):</label>
+                                    <InputSelect class="form-select" @bind-Value="indicador.FkIdLiteral" required>
+                                        <option disabled value="">-- Seleccione --</option>
+                                        @foreach (var l in literalesDisponibles)
+                                        {
+                                            <option value="@l.Id">@l.Descripcion</option>
+                                        }
+                                    </InputSelect>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Numeral (FK):</label>
+                                    <InputSelect class="form-select" @bind-Value="indicador.FkIdNumeral" required>
+                                        <option disabled value="">-- Seleccione --</option>
+                                        @foreach (var n in numeralesDisponibles)
+                                        {
+                                            <option value="@n.Id">@n.Descripcion</option>
+                                        }
+                                    </InputSelect>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Parágrafo (FK):</label>
+                                    <InputSelect class="form-select" @bind-Value="indicador.FkIdParagrafo" required>
+                                        <option disabled value="">-- Seleccione --</option>
+                                        @foreach (var p in paragrafosDisponibles)
+                                        {
+                                            <option value="@p.Id">@p.Descripcion</option>
+                                        }
+                                    </InputSelect>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Responsables:</label>
+                                    <div class="d-flex flex-wrap">
+                                        @foreach (var actor in responsablesSeleccionados)
+                                        {
+                                            <div class="badge bg-info text-white me-2 mb-2">
+                                                @actor.Nombre
+                                                <button type="button" class="btn-close btn-sm ms-2"
+                                                    @onclick="() => QuitarResponsable(actor)"></button>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="input-group">
+                                    <InputSelect class="form-select" @bind-Value="responsableSeleccionadoId">
+                                        <option disabled value="">-- Seleccione Responsable --</option>
+                                        @foreach (var actor in actoresDisponibles)
+                                        {
+                                            <option value="@actor.Id">@actor.Nombre</option>
+                                        }
+                                    </InputSelect>
+
+                                    <button class="btn btn-primary" type="button" @onclick="AgregarResponsable"
+                                        disabled="@string.IsNullOrWhiteSpace(responsableSeleccionadoId)">Añadir
+                                        Responsable
+                                    </button>
+
+                                </div>
+                            </div>
                         </div>
                         <div class="d-flex justify-content-end">
                             <button type="submit" class="btn btn-success me-2">
@@ -209,12 +244,12 @@ else
                             </button>
                         </div>
                     </EditForm>
-
                 </div>
             </div>
         </div>
     </div>
 }
+
 
 @code {
     private List<Indicador> indicadores = new();
@@ -226,6 +261,10 @@ else
     private List<Literal> literalesDisponibles = new();
     private List<Numeral> numeralesDisponibles = new();
     private List<Paragrafo> paragrafosDisponibles = new();
+    private List<Actor> Actores = new();
+    private List<Actor> actoresDisponibles = new();
+    private List<Actor> responsablesSeleccionados = new();
+    private string? responsableSeleccionadoId = "";
     private Indicador indicador = new();
     private bool mostrarFormulario = false;
     private string? mensajeAlerta;
@@ -246,15 +285,17 @@ else
         literalesDisponibles = await Repository.GetAsync<List<Literal>>("api/Literal");
         numeralesDisponibles = await Repository.GetAsync<List<Numeral>>("api/Numeral");
         paragrafosDisponibles = await Repository.GetAsync<List<Paragrafo>>("api/Paragrafo");
+        Actores = await Repository.GetAsync<List<Actor>>("api/Actor");
     }
 
     private void MostrarFormulario()
     {
         indicador = new Indicador();
         mostrarFormulario = true;
+        actoresDisponibles = Actores;
     }
 
-    private void EditarIndicador(Indicador i)
+    private async Task EditarIndicador(Indicador i)
     {
         indicador = new Indicador
         {
@@ -274,28 +315,99 @@ else
             FkIdNumeral = i.FkIdNumeral,
             FkIdParagrafo = i.FkIdParagrafo
         };
+
         mostrarFormulario = true;
+        mensajeAlerta = string.Empty;
+        mostrarAlerta = false;
+
+        // Cargar actores disponibles
+        actoresDisponibles = await Repository.GetAsync<List<Actor>>("api/Actor");
+
+        // Cargar responsables ya asignados
+        await CargarResponsables();
+
+        // Eliminar los ya seleccionados de la lista de disponibles
+        actoresDisponibles = actoresDisponibles
+        .Where(a => !responsablesSeleccionados.Any(r => r.Id == a.Id))
+        .ToList();
     }
 
     private async Task GuardarIndicador()
     {
         mostrarFormulario = false;
-        var url1 = "api/Indicador";
+        var urlIndicador = "api/Indicador";
         var url2 = $"api/Indicador/{indicador.Id}";
 
-        // No verificar si el Id es 0, sino si es un nuevo indicador basado en el ID de la base de datos
         if (indicador.Id == 0)
         {
-            await Repository.PostAsync(url1, indicador);
+            // Guardar nuevo indicador
+            var indicadorGuardado = await Repository.PostAsync(urlIndicador, indicador);
+            indicador.Id = indicadorGuardado.Id;
+
+
             mensajeAlerta = "Indicador guardado correctamente";
+
+            // Verificar si hay responsables antes de intentar guardarlos
+            if (responsablesSeleccionados != null && responsablesSeleccionados.Any())
+            {
+                foreach (var responsable in responsablesSeleccionados)
+                {
+                    var nuevoResponsable = new ResponsablesPorIndicador
+                    {
+                        FkIdIndicador = indicador.Id,
+                        FkIdResponsable = responsable.Id, // O el valor que corresponda
+                        FechaAsignacion = DateTime.Now
+                    };
+
+                    await Repository.PostAsync("api/ResponsablesPorIndicador", nuevoResponsable);
+                }
+            }
         }
         else
         {
+            // Actualizar indicador
             await Repository.PutAsync(url2, indicador);
             mensajeAlerta = "Indicador actualizado correctamente";
+
+            // Obtener todos los responsables actuales
+            var responsablesActuales = await Repository.GetAsync<List<ResponsablesPorIndicador>>("api/ResponsablesPorIndicador");
+
+            // Filtrar los responsables del indicador actual
+            var responsablesDelIndicador = responsablesActuales
+            .Where(r => r.FkIdIndicador == indicador.Id)
+            .ToList();
+
+            // Crear listas de IDs para la comparación
+            var responsablesActualesIds = responsablesDelIndicador.Select(r => r.FkIdResponsable).ToList();
+            var responsablesSeleccionadosIds = responsablesSeleccionados.Select(r => r.Id).ToList();
+
+            // Eliminar los responsables que ya no están seleccionados
+            foreach (var responsable in responsablesDelIndicador)
+            {
+                if (!responsablesSeleccionadosIds.Contains(responsable.FkIdResponsable))
+                {
+                    await Repository.DeleteAsync($"api/ResponsablesPorIndicador/{responsable.FkIdResponsable}/{indicador.Id}");
+                }
+            }
+
+            // Agregar los nuevos responsables seleccionados
+            foreach (var responsableId in responsablesSeleccionadosIds)
+            {
+                if (!responsablesActualesIds.Contains(responsableId))
+                {
+                    var nuevoResponsable = new ResponsablesPorIndicador
+                    {
+                        FkIdIndicador = indicador.Id,
+                        FkIdResponsable = responsableId,
+                        FechaAsignacion = DateTime.Now
+                    };
+
+                    await Repository.PostAsync("api/ResponsablesPorIndicador", nuevoResponsable);
+                }
+            }
         }
 
-        indicadores = await Repository.GetAsync<List<Indicador>>(url1);
+        indicadores = await Repository.GetAsync<List<Indicador>>(urlIndicador);
         mostrarAlerta = true;
     }
 
@@ -308,6 +420,52 @@ else
         indicadores = await Repository.GetAsync<List<Indicador>>(url1);
         mensajeAlerta = "Indicador eliminado correctamente";
         mostrarAlerta = true;
+    }
+
+    private void AgregarResponsable()
+    {
+        if (!string.IsNullOrWhiteSpace(responsableSeleccionadoId))
+        {
+            var actor = actoresDisponibles.FirstOrDefault(a => a.Id == responsableSeleccionadoId);
+            if (actor != null && !responsablesSeleccionados.Any(r => r.Id == actor.Id))
+            {
+                responsablesSeleccionados.Add(actor);
+                actoresDisponibles.Remove(actor);
+                responsableSeleccionadoId = string.Empty;
+            }
+        }
+    }
+
+    private async Task CargarResponsables()
+    {
+        if (indicador.Id > 0)
+        {
+            // Obtener todos los responsables asociados a cualquier indicador
+            var responsablesActuales = await Repository.GetAsync<List<ResponsablesPorIndicador>>("api/ResponsablesPorIndicador");
+
+            // Filtrar solo los responsables para el indicador actual
+            var responsablesDelIndicador = responsablesActuales
+            .Where(r => r.FkIdIndicador == indicador.Id)
+            .ToList();
+
+            // Limpiar la lista actual de responsables seleccionados
+            responsablesSeleccionados.Clear();
+
+            // Mapear los responsables actuales a una lista que será mostrada como seleccionados
+            foreach (var r in responsablesDelIndicador)
+            {
+                var responsable = await Repository.GetByIDAsync<Actor>("api/Actor", r.FkIdResponsable);
+                responsablesSeleccionados.Add(responsable);
+            }
+        }
+    }
+
+
+    private void QuitarResponsable(Actor actor)
+    {
+        responsablesSeleccionados.Remove(actor);
+        actoresDisponibles.Add(actor);
+        responsableSeleccionadoId = string.Empty;
     }
 
     private void Cancelar()
