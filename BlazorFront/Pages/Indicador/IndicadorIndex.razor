@@ -233,6 +233,56 @@ else
                                     </button>
 
                                 </div>
+                                <div class="mb-3 mt-3">
+                                    <label class="form-label">Fuentes:</label>
+                                    <div class="d-flex flex-wrap">
+                                        @foreach (var fuente in fuentesSeleccionadas)
+                                        {
+                                            <div class="badge bg-info text-white me-2 mb-2">
+                                                @fuente.Nombre
+                                                <button type="button" class="btn-close btn-sm ms-2"
+                                                    @onclick="() => QuitarFuente(fuente)"></button>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="input-group">
+                                    <InputSelect class="form-select" @bind-Value="fuenteSeleccionadaId">
+                                        <option value="">-- Seleccione Fuente --</option>
+                                        @foreach (var fuente in fuentesDisponibles)
+                                        {
+                                            <option value="@fuente.Id">@fuente.Nombre</option>
+                                        }
+                                    </InputSelect>
+                                    <button class="btn btn-primary" type="button" @onclick="AgregarFuente" disabled="@(!fuenteSeleccionadaId.HasValue)">
+                                        Añadir Fuente
+                                    </button>
+                                </div>
+                                <div class="mb-3 mt-3">
+                                    <label class="form-label">Representaciones Visuales:</label>
+                                    <div class="d-flex flex-wrap">
+                                        @foreach (var representacion in representacionesVisualesSeleccionadas)
+                                        {
+                                            <div class="badge bg-info text-white me-2 mb-2">
+                                                @representacion.Nombre
+                                                <button type="button" class="btn-close btn-sm ms-2"
+                                                    @onclick="() => QuitarRepresentacionVisual(representacion)"></button>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="input-group">
+                                    <InputSelect class="form-select" @bind-Value="representacionVisualSeleccionadaId">
+                                        <option value="">-- Seleccione Representación Visual --</option>
+                                        @foreach (var representacion in representacionesVisualesDisponibles)
+                                        {
+                                            <option value="@representacion.Id">@representacion.Nombre</option>
+                                        }
+                                    </InputSelect>
+                                    <button class="btn btn-primary" type="button" @onclick="AgregarRepresentacionVisual" disabled="@(!representacionVisualSeleccionadaId.HasValue)">
+                                        Añadir Representación Visual
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         <div class="d-flex justify-content-end">
@@ -261,14 +311,27 @@ else
     private List<Literal> literalesDisponibles = new();
     private List<Numeral> numeralesDisponibles = new();
     private List<Paragrafo> paragrafosDisponibles = new();
-    private List<Actor> Actores = new();
-    private List<Actor> actoresDisponibles = new();
-    private List<Actor> responsablesSeleccionados = new();
-    private string? responsableSeleccionadoId = "";
     private Indicador indicador = new();
     private bool mostrarFormulario = false;
     private string? mensajeAlerta;
     private bool mostrarAlerta = false;
+
+    //Tablas intermedias
+    //ResponsablesPorIndicador
+    private List<Actor> Actores = new();
+    private List<Actor> actoresDisponibles = new();
+    private List<Actor> responsablesSeleccionados = new();
+    private string? responsableSeleccionadoId = "";
+    //FuentesPorIndicador
+    private List<Fuente> Fuentes = new();
+    private List<Fuente> fuentesDisponibles = new();
+    private List<Fuente> fuentesSeleccionadas = new();
+    private int? fuenteSeleccionadaId = null;
+    //RepresenVisualPorIndicador
+    private List<RepresentacionVisual> RepresentacionVisual = new();
+    private List<RepresentacionVisual> representacionesVisualesDisponibles = new();
+    private List<RepresentacionVisual> representacionesVisualesSeleccionadas = new();
+    private int? representacionVisualSeleccionadaId = null;
 
     [Inject] private IRepository Repository { get; set; } = null!;
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
@@ -286,6 +349,8 @@ else
         numeralesDisponibles = await Repository.GetAsync<List<Numeral>>("api/Numeral");
         paragrafosDisponibles = await Repository.GetAsync<List<Paragrafo>>("api/Paragrafo");
         Actores = await Repository.GetAsync<List<Actor>>("api/Actor");
+        Fuentes = await Repository.GetAsync<List<Fuente>>("api/Fuente");
+        RepresentacionVisual = await Repository.GetAsync<List<RepresentacionVisual>>("api/RepresentacionVisual");
     }
 
     private void MostrarFormulario()
@@ -293,6 +358,8 @@ else
         indicador = new Indicador();
         mostrarFormulario = true;
         actoresDisponibles = Actores;
+        fuentesDisponibles = Fuentes;
+        representacionesVisualesDisponibles = RepresentacionVisual;
     }
 
     private async Task EditarIndicador(Indicador i)
@@ -322,14 +389,24 @@ else
 
         // Cargar actores disponibles
         actoresDisponibles = await Repository.GetAsync<List<Actor>>("api/Actor");
-
         // Cargar responsables ya asignados
         await CargarResponsables();
-
         // Eliminar los ya seleccionados de la lista de disponibles
-        actoresDisponibles = actoresDisponibles
-        .Where(a => !responsablesSeleccionados.Any(r => r.Id == a.Id))
-        .ToList();
+        actoresDisponibles = actoresDisponibles.Where(a => !responsablesSeleccionados.Any(r => r.Id == a.Id)).ToList();
+
+        // Cargar fuentes disponibles
+        fuentesDisponibles = await Repository.GetAsync<List<Fuente>>("api/Fuente");
+        // Cargar fuentes ya asignadas
+        await CargarFuentes();
+        // Eliminar los ya seleccionados de la lista de disponibles
+        fuentesDisponibles = fuentesDisponibles.Where(f => !fuentesSeleccionadas.Any(r => r.Id == f.Id)).ToList();
+
+        // Cargar representaciones visuales disponibles
+        representacionesVisualesDisponibles = await Repository.GetAsync<List<RepresentacionVisual>>("api/RepresentacionVisual");
+        // Cargar representaciones visuales ya asignadas
+        await CargarRepresentacionesVisuales();
+        // Eliminar los ya seleccionados de la lista de disponibles
+        representacionesVisualesDisponibles = representacionesVisualesDisponibles.Where(r => !representacionesVisualesSeleccionadas.Any(rv => rv.Id == r.Id)).ToList();
     }
 
     private async Task GuardarIndicador()
@@ -355,11 +432,39 @@ else
                     var nuevoResponsable = new ResponsablesPorIndicador
                     {
                         FkIdIndicador = indicador.Id,
-                        FkIdResponsable = responsable.Id, // O el valor que corresponda
+                        FkIdResponsable = responsable.Id,
                         FechaAsignacion = DateTime.Now
                     };
 
                     await Repository.PostAsync("api/ResponsablesPorIndicador", nuevoResponsable);
+                }
+            }
+            // Verificar si hay fuentes antes de intentar guardarlas
+            if (fuentesSeleccionadas != null && fuentesSeleccionadas.Any())
+            {
+                foreach (var fuente in fuentesSeleccionadas)
+                {
+                    var nuevaFuente = new FuentePorIndicador
+                    {
+                        FkIdIndicador = indicador.Id,
+                        FkIdFuente = fuente.Id,
+                    };
+
+                    await Repository.PostAsync("api/FuentePorIndicador", nuevaFuente);
+                }
+            }
+            // Verificar si hay representaciones visuales antes de intentar guardarlas
+            if (representacionesVisualesSeleccionadas != null && representacionesVisualesSeleccionadas.Any())
+            {
+                foreach (var representacion in representacionesVisualesSeleccionadas)
+                {
+                    var nuevaRepresentacion = new RepresenVisualPorIndicador
+                    {
+                        FkIdIndicador = indicador.Id,
+                        FkIdRepresenVisual = representacion.Id,
+                    };
+
+                    await Repository.PostAsync("api/RepresenVisualPorIndicador", nuevaRepresentacion);
                 }
             }
         }
@@ -405,6 +510,65 @@ else
                     await Repository.PostAsync("api/ResponsablesPorIndicador", nuevoResponsable);
                 }
             }
+            //Obtenemos todas las fuentes actuales
+            var fuentesActuales = await Repository.GetAsync<List<FuentePorIndicador>>("api/FuentePorIndicador");
+            //filtrar las fuentes del indicador actual
+            var fuentesDelIndicador = fuentesActuales.Where(f => f.FkIdIndicador == indicador.Id).ToList();
+            // Crear listas de IDs para la comparación
+            var fuentesActualesIds = fuentesDelIndicador.Select(f => f.FkIdFuente).ToList();
+            var fuentesSeleccionadasIds = fuentesSeleccionadas.Select(f => f.Id).ToList();
+            // Eliminar las fuentes que ya no están seleccionadas
+            foreach (var fuente in fuentesDelIndicador)
+            {
+                if (!fuentesSeleccionadasIds.Contains(fuente.FkIdFuente))
+                {
+                    await Repository.DeleteAsync($"api/FuentePorIndicador/{fuente.FkIdFuente}/{indicador.Id}");
+                }
+            }
+            // Agregar las nuevas fuentes seleccionadas
+            foreach (var fuenteId in fuentesSeleccionadasIds)
+            {
+                if (!fuentesActualesIds.Contains(fuenteId))
+                {
+                    var nuevaFuente = new FuentePorIndicador
+                    {
+                        FkIdIndicador = indicador.Id,
+                        FkIdFuente = fuenteId,
+                    };
+
+                    await Repository.PostAsync("api/FuentePorIndicador", nuevaFuente);
+                }
+            }
+
+            //Obtenemos todas las representaciones actuales
+            var representacionesActuales = await Repository.GetAsync<List<RepresenVisualPorIndicador>>("api/RepresenVisualPorIndicador");
+            //filtrar las representaciones del indicador actual
+            var representacionesDelIndicador = representacionesActuales.Where(r => r.FkIdIndicador == indicador.Id).ToList();
+            // Crear listas de IDs para la comparación
+            var representacionesActualesIds = representacionesDelIndicador.Select(r => r.FkIdRepresenVisual).ToList();
+            var representacionesSeleccionadasIds = representacionesVisualesSeleccionadas.Select(r => r.Id).ToList();
+            // Eliminar las representaciones que ya no están seleccionadas
+            foreach (var representacion in representacionesDelIndicador)
+            {
+                if (!representacionesSeleccionadasIds.Contains(representacion.FkIdRepresenVisual))
+                {
+                    await Repository.DeleteAsync($"api/RepresenVisualPorIndicador/{indicador.Id}/{representacion.FkIdRepresenVisual}");
+                }
+            }
+            // Agregar las nuevas representaciones seleccionadas
+            foreach (var representacionId in representacionesSeleccionadasIds)
+            {
+                if (!representacionesActualesIds.Contains(representacionId))
+                {
+                    var nuevaRepresentacion = new RepresenVisualPorIndicador
+                    {
+                        FkIdIndicador = indicador.Id,
+                        FkIdRepresenVisual = representacionId,
+                    };
+
+                    await Repository.PostAsync("api/RepresenVisualPorIndicador", nuevaRepresentacion);
+                }
+            }
         }
 
         indicadores = await Repository.GetAsync<List<Indicador>>(urlIndicador);
@@ -435,7 +599,6 @@ else
             }
         }
     }
-
     private async Task CargarResponsables()
     {
         if (indicador.Id > 0)
@@ -459,15 +622,96 @@ else
             }
         }
     }
-
-
     private void QuitarResponsable(Actor actor)
     {
         responsablesSeleccionados.Remove(actor);
         actoresDisponibles.Add(actor);
         responsableSeleccionadoId = string.Empty;
     }
+    private void AgregarFuente()
+    {
+        if (fuenteSeleccionadaId.HasValue)
+        {
+            var fuente = fuentesDisponibles.FirstOrDefault(f => f.Id == fuenteSeleccionadaId);
+            if (fuente != null && !fuentesSeleccionadas.Any(f => f.Id == fuente.Id))
+            {
+                fuentesSeleccionadas.Add(fuente);
+                fuentesDisponibles.Remove(fuente);
+                fuenteSeleccionadaId = null;
+            }
+        }
+    }
+    private void QuitarFuente(Fuente fuente)
+    {
+        fuentesSeleccionadas.Remove(fuente);
+        fuentesDisponibles.Add(fuente);
+        fuenteSeleccionadaId = null;
+    }
+    private async Task CargarFuentes()
+    {
+        if (indicador.Id > 0)
+        {
+            // Obtener todos los responsables asociados a cualquier indicador
+            var fuentesActuales = await Repository.GetAsync<List<FuentePorIndicador>>("api/FuentePorIndicador");
 
+            // Filtrar solo los responsables para el indicador actual
+            var fuentesDelIndicador = fuentesActuales
+            .Where(r => r.FkIdIndicador == indicador.Id)
+            .ToList();
+
+            // Limpiar la lista actual de fuentes seleccionadas
+            fuentesSeleccionadas.Clear();
+
+            // Mapear los responsables actuales a una lista que será mostrada como seleccionados
+            foreach (var r in fuentesDelIndicador)
+            {
+                var fuente = await Repository.GetByIDAsync<Fuente>("api/Fuente", r.FkIdFuente);
+                fuentesSeleccionadas.Add(fuente);
+            }
+        }
+    }
+    private void AgregarRepresentacionVisual()
+    {
+        if (representacionVisualSeleccionadaId.HasValue)
+        {
+            var representacion = representacionesVisualesDisponibles.FirstOrDefault(r => r.Id == representacionVisualSeleccionadaId);
+            if (representacion != null && !representacionesVisualesSeleccionadas.Any(r => r.Id == representacion.Id))
+            {
+                representacionesVisualesSeleccionadas.Add(representacion);
+                representacionesVisualesDisponibles.Remove(representacion);
+                representacionVisualSeleccionadaId = null;
+            }
+        }
+    }
+    private void QuitarRepresentacionVisual(RepresentacionVisual representacion)
+    {
+        representacionesVisualesSeleccionadas.Remove(representacion);
+        representacionesVisualesDisponibles.Add(representacion);
+        representacionVisualSeleccionadaId = null;
+    }
+    private async Task CargarRepresentacionesVisuales()
+    {
+        if (indicador.Id > 0)
+        {
+            // Obtener todos los responsables asociados a cualquier indicador
+            var representacionesActuales = await Repository.GetAsync<List<RepresenVisualPorIndicador>>("api/RepresenVisualPorIndicador");
+
+            // Filtrar solo los responsables para el indicador actual
+            var representacionesDelIndicador = representacionesActuales
+            .Where(r => r.FkIdIndicador == indicador.Id)
+            .ToList();
+
+            // Limpiar la lista actual de fuentes seleccionadas
+            representacionesVisualesSeleccionadas.Clear();
+
+            // Mapear los responsables actuales a una lista que será mostrada como seleccionados
+            foreach (var r in representacionesDelIndicador)
+            {
+                var representacion = await Repository.GetByIDAsync<RepresentacionVisual>("api/RepresentacionVisual", r.FkIdRepresenVisual);
+                representacionesVisualesSeleccionadas.Add(representacion);
+            }
+        }
+    }
     private void Cancelar()
     {
         mostrarFormulario = false;
