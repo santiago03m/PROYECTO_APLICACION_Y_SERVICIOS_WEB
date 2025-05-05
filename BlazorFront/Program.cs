@@ -14,6 +14,7 @@ public class Program
         var url = "https://localhost:7123";
         builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(url) });
         builder.Services.AddScoped<IRepository, Repository>();
+        builder.Services.AddBlazorBootstrap();
 
         await builder.Build().RunAsync();
     }

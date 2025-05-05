@@ -3,8 +3,8 @@
 
 <h3 class="text-center mt-4">Gestión de Indicadores</h3>
 <div class="d-flex justify-content-end mb-3">
-    <button class="btn btn-primary" @onclick="MostrarFormulario">
-        <i class="fas fa-plus"></i> Agregar Indicador
+    <button class="btn btn-primary d-flex align-items-center" @onclick="MostrarFormulario">
+        <i class="fas fa-plus me-1"></i> Agregar Indicador
     </button>
 </div>
 
@@ -29,68 +29,71 @@ else if (!indicadores.Any())
 }
 else
 {
-    <table class="table table-striped table-hover">
-        <thead class="table-dark">
-            <tr>
-                <th>#</th>
-                <th>ID</th>
-                <th>Código</th>
-                <th>Nombre</th>
-                <th>Objetivo</th>
-                <th>Alcance</th>
-                <th>Fórmula</th>
-                <th>Tipo Indicador</th>
-                <th>Unidad Medición</th>
-                <th>Meta</th>
-                <th>Sentido</th>
-                <th>Frecuencia</th>
-                <th>Artículo</th>
-                <th>Literal</th>
-                <th>Numeral</th>
-                <th>Parágrafo</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var (i, index) in indicadores.Select((i, idx) => (i, idx + 1)))
-            {
+    <div style="overflow-x: auto;">
+        <table class="table table-hover table-striped shadow-sm rounded-3">
+            <thead class="table-dark text-center">
                 <tr>
-                    <td>@index</td>
-                    <td>@i.Id</td>
-                    <td>@i.Codigo</td>
-                    <td>@i.Nombre</td>
-                    <td>@i.Objetivo</td>
-                    <td>@i.Alcance</td>
-                    <td>@i.Formula</td>
-                    <td>@i.FkIdTipoIndicador</td>
-                    <td>@i.FkIdUnidadMedicion</td>
-                    <td>@i.Meta</td>
-                    <td>@i.FkIdSentido</td>
-                    <td>@i.FkIdFrecuencia</td>
-                    <td>@i.FkIdArticulo</td>
-                    <td>@i.FkIdLiteral</td>
-                    <td>@i.FkIdNumeral</td>
-                    <td>@i.FkIdParagrafo</td>
-                    <td>
-                        <button class="btn btn-warning btn-sm me-2" @onclick="() => EditarIndicador(i)">
-                            <i class="fas fa-edit"></i> Editar
-                        </button>
-                        <button class="btn btn-danger btn-sm" @onclick="() => EliminarIndicador(i.Id)">
-                            <i class="fas fa-trash"></i> Eliminar
-                        </button>
-                    </td>
+                    <th>#</th>
+                    <th>ID</th>
+                    <th>Código</th>
+                    <th>Nombre</th>
+                    <th>Objetivo</th>
+                    <th>Alcance</th>
+                    <th>Fórmula</th>
+                    <th>Tipo Indicador</th>
+                    <th>Unidad Medición</th>
+                    <th>Meta</th>
+                    <th>Sentido</th>
+                    <th>Frecuencia</th>
+                    <th>Artículo</th>
+                    <th>Literal</th>
+                    <th>Numeral</th>
+                    <th>Parágrafo</th>
+                    <th class="text-center">Acciones</th>
                 </tr>
-            }
-        </tbody>
-    </table>
-
+            </thead>
+            <tbody>
+                @foreach (var (i, index) in indicadores.Select((i, idx) => (i, idx + 1)))
+                {
+                    <tr>
+                        <td>@index</td>
+                        <td>@i.Id</td>
+                        <td>@i.Codigo</td>
+                        <td>@i.Nombre</td>
+                        <td>@i.Objetivo</td>
+                        <td>@i.Alcance</td>
+                        <td>@i.Formula</td>
+                        <td>@i.FkIdTipoIndicador</td>
+                        <td>@i.FkIdUnidadMedicion</td>
+                        <td>@i.Meta</td>
+                        <td>@i.FkIdSentido</td>
+                        <td>@i.FkIdFrecuencia</td>
+                        <td>@i.FkIdArticulo</td>
+                        <td>@i.FkIdLiteral</td>
+                        <td>@i.FkIdNumeral</td>
+                        <td>@i.FkIdParagrafo</td>
+                        <td class="text-center">
+                            <div class="d-flex justify-content-center flex-wrap">
+                                <button class="btn btn-primary btn-sm me-2 mb-1 d-flex align-items-center" @onclick="() => EditarIndicador(i)">
+                                    <i class="fas fa-edit me-1"></i> Editar
+                                </button>
+                                <button class="btn btn-danger btn-sm mb-1 d-flex align-items-center" @onclick="() => EliminarIndicador(i.Id)">
+                                    <i class="fas fa-trash-alt me-1"></i> Eliminar
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 }
 
 @if (mostrarFormulario)
 {
-    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
-        <div class="modal-dialog">
-            <div class="modal-content">
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(2px);">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content shadow-lg rounded-4 border-0">
                 <div class="modal-header">
                     <h5 class="modal-title">@((indicador.Id == 0) ? "Agregar Indicador" : "Editar Indicador")</h5>
                     <button type="button" class="btn-close" @onclick="Cancelar"></button>
@@ -98,7 +101,7 @@ else
                 <div class="modal-body">
                     <EditForm Model="indicador" OnValidSubmit="GuardarIndicador">
                         <div class="row">
-                            <div class="col-md-6 mb-3">
+                            <div class="col-lg-6 col-12">
                                 <div class="mb-3">
                                     <label class="form-label">Código:</label>
                                     <InputText class="form-control" @bind-Value="indicador.Codigo" required />
@@ -204,16 +207,17 @@ else
                                     </InputSelect>
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-lg-6 col-12">
                                 <div class="mb-3">
                                     <label class="form-label">Responsables:</label>
                                     <div class="d-flex flex-wrap">
                                         @foreach (var actor in responsablesSeleccionados)
                                         {
-                                            <div class="badge bg-info text-white me-2 mb-2">
-                                                @actor.Nombre
-                                                <button type="button" class="btn-close btn-sm ms-2"
-                                                    @onclick="() => QuitarResponsable(actor)"></button>
+                                            <div class="badge bg-primary text-white rounded-pill d-flex align-items-center me-2 mb-2 px-3 py-2">
+                                                <span class="me-2">@actor.Nombre</span>
+                                                <button type="button" class="btn-close btn-sm ms-2 d-flex align-items-center"
+                                                    @onclick="() => QuitarResponsable(actor)">
+                                                </button>
                                             </div>
                                         }
                                     </div>
@@ -228,8 +232,8 @@ else
                                     </InputSelect>
 
                                     <button class="btn btn-primary" type="button" @onclick="AgregarResponsable"
-                                        disabled="@string.IsNullOrWhiteSpace(responsableSeleccionadoId)">Añadir
-                                        Responsable
+                                        disabled="@string.IsNullOrWhiteSpace(responsableSeleccionadoId)">
+                                        Añadir Responsable
                                     </button>
 
                                 </div>
@@ -238,10 +242,11 @@ else
                                     <div class="d-flex flex-wrap">
                                         @foreach (var fuente in fuentesSeleccionadas)
                                         {
-                                            <div class="badge bg-info text-white me-2 mb-2">
-                                                @fuente.Nombre
-                                                <button type="button" class="btn-close btn-sm ms-2"
-                                                    @onclick="() => QuitarFuente(fuente)"></button>
+                                            <div class="badge bg-primary text-white rounded-pill d-flex align-items-center me-2 mb-2 px-3 py-2">
+                                                <span class="me-2">@fuente.Nombre</span>
+                                                <button type="button" class="btn-close btn-sm ms-2 d-flex align-items-center"
+                                                    @onclick="() => QuitarFuente(fuente)">
+                                                </button>
                                             </div>
                                         }
                                     </div>
@@ -263,10 +268,11 @@ else
                                     <div class="d-flex flex-wrap">
                                         @foreach (var representacion in representacionesVisualesSeleccionadas)
                                         {
-                                            <div class="badge bg-info text-white me-2 mb-2">
-                                                @representacion.Nombre
-                                                <button type="button" class="btn-close btn-sm ms-2"
-                                                    @onclick="() => QuitarRepresentacionVisual(representacion)"></button>
+                                            <div class="badge bg-primary text-white rounded-pill d-flex align-items-center me-2 mb-2 px-3 py-2">
+                                                <span class="me-2">@representacion.Nombre</span>
+                                                <button type="button" class="btn-close btn-sm ms-2 d-flex align-items-center"
+                                                    @onclick="() => QuitarRepresentacionVisual(representacion)">
+                                                </button>
                                             </div>
                                         }
                                     </div>
@@ -285,13 +291,15 @@ else
                                 </div>
                             </div>
                         </div>
-                        <div class="d-flex justify-content-end">
-                            <button type="submit" class="btn btn-success me-2">
-                                <i class="fas fa-save"></i> Guardar
-                            </button>
-                            <button type="button" class="btn btn-secondary" @onclick="Cancelar">
-                                <i class="fas fa-times"></i> Cancelar
-                            </button>
+                        <div class="card mt-3 border-0 bg-light">
+                            <div class="d-flex justify-content-end">
+                                <button type="submit" class="btn btn-success me-2">
+                                    <i class="fas fa-save"></i> Guardar
+                                </button>
+                                <button type="button" class="btn btn-secondary" @onclick="Cancelar">
+                                    <i class="fas fa-times"></i> Cancelar
+                                </button>
+                            </div>
                         </div>
                     </EditForm>
                 </div>
