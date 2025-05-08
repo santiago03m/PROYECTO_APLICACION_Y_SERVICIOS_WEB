@@ -27,7 +27,11 @@ namespace CRUD.Backend.Controllers
         public async Task<ActionResult> PostAsync(Usuario usuario)
         {
             try
-            { _context.Usuario.Add(usuario);
+            {
+                // Hashear la contraseña
+                usuario.Contrasena = BCrypt.Net.BCrypt.HashPassword(usuario.Contrasena);
+
+                _context.Usuario.Add(usuario);
                 await _context.SaveChangesAsync();
                 return Ok(usuario);
             }
@@ -71,7 +75,19 @@ namespace CRUD.Backend.Controllers
                 return NotFound($"No se encontró un usuario con el email: {email}");
             }
 
-            // Actualiza solo los valores modificados en la entidad existente
+            // Si la contraseña fue modificada, se vuelve a hashear
+            if (!string.IsNullOrWhiteSpace(usuario.Contrasena) &&
+                !BCrypt.Net.BCrypt.Verify(usuario.Contrasena, usuarioExistente.Contrasena))
+            {
+                usuario.Contrasena = BCrypt.Net.BCrypt.HashPassword(usuario.Contrasena);
+            }
+            else
+            {
+                // Si no cambia la contraseña, conservar la actual
+                usuario.Contrasena = usuarioExistente.Contrasena;
+            }
+
+            // Actualiza los valores en el usuario existente
             _context.Entry(usuarioExistente).CurrentValues.SetValues(usuario);
 
             try

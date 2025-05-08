@@ -70,9 +70,15 @@ else
                 <div class="modal-body">
                     <EditForm Model="rolUsuario" OnValidSubmit="GuardarRolUsuario">
                         <div class="mb-3">
-                            <label class="form-label">Email:</label>
-                            <InputText class="form-control" @bind-Value="rolUsuario.FkEmail" required />
-                        </div>
+                                    <label class="form-label">Email:</label>
+                                    <InputSelect class="form-select" @bind-Value="rolUsuario.FkEmail" required>
+                                        <option disabled value="">-- Seleccione --</option>
+                                        @foreach (var u in UsuariosDisponibles)
+                                        {
+                                            <option value="@u.Email">@u.Email</option>
+                                        }
+                                    </InputSelect>
+                                </div>
                         <div class="mb-3">
                             <label class="form-label">ID Rol:</label>
                             <InputSelect class="form-select" @bind-Value="rolUsuario.FkIdRol" required>
@@ -101,6 +107,7 @@ else
 @code {
     private List<RolUsuario> rolesUsuarios = new();
     private List<Rol> rolesDisponibles = new();
+    private List<Usuario> UsuariosDisponibles = new();
     private RolUsuario rolUsuario = new();
     private bool mostrarFormulario = false;
     private string? mensajeAlerta;
@@ -114,6 +121,7 @@ else
         var url = "api/RolUsuario";
         rolesUsuarios = await Repository.GetAsync<List<RolUsuario>>(url);
         rolesDisponibles = await Repository.GetAsync<List<Rol>>("api/Rol");
+        UsuariosDisponibles = await Repository.GetAsync<List<Usuario>>("api/Usuarios");
     }
 
     private void MostrarFormulario()

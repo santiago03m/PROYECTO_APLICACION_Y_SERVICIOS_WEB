@@ -1,0 +1,87 @@
+@page "/login"
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+
+<h3 class="text-center mb-4">Iniciar sesión</h3>
+
+<EditForm Model="loginModel" OnValidSubmit="HandleLogin">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <InputText @bind-Value="loginModel.Email" class="form-control" placeholder="Correo electrónico" />
+    </div>
+
+    <div class="mb-3">
+        <InputText @bind-Value="loginModel.Password" type="password" class="form-control" placeholder="Contraseña" />
+    </div>
+
+    <div class="d-grid">
+        <button type="submit" class="btn btn-primary">Iniciar sesión</button>
+    </div>
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger mt-3" role="alert">
+            @errorMessage
+        </div>
+    }
+</EditForm>
+
+
+@code {
+    private LoginDTO loginModel = new();
+    private string? errorMessage;
+
+    private async Task HandleLogin()
+    {
+        try
+        {
+            var response = await Http.PostAsJsonAsync("api/Auth/login", loginModel);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<LoginResponse>();
+
+                // Guardar token y roles en localStorage
+                await JS.InvokeVoidAsync("localStorage.setItem", "token", result!.token);
+                await JS.InvokeVoidAsync("localStorage.setItem", "roles", JsonSerializer.Serialize(result.roles));
+
+                // ✅ Notificar al AuthenticationProvider
+                if (AuthenticationStateProvider is AuthenticationProviderJWT authProvider)
+                {
+                    await authProvider.Login(result!.token);
+                }
+
+                // Redirigir
+                Navigation.NavigateTo("/", forceLoad: true);
+            }
+            else
+            {
+                var error = await response.Content.ReadFromJsonAsync<ErrorResponse>();
+                errorMessage = error?.Message ?? "Error desconocido.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error: {ex.Message}";
+        }
+    }
+
+    public class LoginResponse
+    {
+        public string Message { get; set; } = "";
+        public bool isSuccess { get; set; }
+        public string token { get; set; } = "";
+        public List<string> roles { get; set; } = new();
+    }
+
+    public class ErrorResponse
+    {
+        public string Message { get; set; } = "";
+        public bool isSuccess { get; set; }
+    }
+}

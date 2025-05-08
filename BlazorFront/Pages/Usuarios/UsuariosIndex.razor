@@ -154,7 +154,7 @@ else
     private async Task EliminarUsuario(string email)
     {
         var url1 = "api/Usuarios";
-        var url2 = $"api/Usuarios/{usuario.Email}";
+        var url2 = $"api/Usuarios/{email}";
 
         await Repository.DeleteAsync(url2);
         usuarios = await Repository.GetAsync<List<Usuario>>(url1);

@@ -1,0 +1,58 @@
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
+
+<AuthorizeView>
+    <Authorized>
+        <div class="dropdown ms-3">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-person-circle me-1"></i> @userName
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                <li class="px-3 py-2 text-center">
+                    <strong>Hola,</strong><br />@userName
+                </li>
+                <li><hr class="dropdown-divider" /></li>
+                <li>
+                    <button class="btn btn-outline-danger w-100" @onclick="CerrarSesion">
+                        Cerrar Sesión
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <div class="container text-center">
+            <a href="/login" class="btn btn-primary">
+                <span class="material-icons align-middle">login</span> Iniciar Sesión
+            </a>
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private string? userName;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Obtener el estado de autenticación
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            userName = user.Identity.Name;
+        }
+    }
+
+    private async Task CerrarSesion()
+    {
+        if (AuthenticationStateProvider is AuthenticationProviderJWT authProvider)
+        {
+            await authProvider.Logout();
+        }
+        // Redirigir al login después de cerrar sesión
+        NavigationManager.NavigateTo("/", forceLoad: true);
+    }
+
+}
