@@ -3,9 +3,12 @@
 
 <h3 class="text-center mt-4">Gestión de Indicadores</h3>
 <div class="d-flex justify-content-end mb-3">
+    @if (userRoles.Contains("admin"))
+    {
     <button class="btn btn-primary d-flex align-items-center" @onclick="MostrarFormulario">
         <i class="fas fa-plus me-1"></i> Agregar Indicador
     </button>
+    }
 </div>
 
 @if (mostrarAlerta)
@@ -74,12 +77,18 @@ else
                         <td>@i.FkIdParagrafo</td>
                         <td class="text-center">
                             <div class="d-flex justify-content-center flex-wrap">
+                                @if (userRoles.Contains("admin")|| userRoles.Contains("Validador"))
+                                {
                                 <button class="btn btn-primary btn-sm me-2 mb-1 d-flex align-items-center" @onclick="() => EditarIndicador(i)">
                                     <i class="fas fa-edit me-1"></i> Editar
                                 </button>
+                                }
+                                @if (userRoles.Contains("admin"))
+                                {
                                 <button class="btn btn-danger btn-sm mb-1 d-flex align-items-center" @onclick="() => EliminarIndicador(i.Id)">
                                     <i class="fas fa-trash-alt me-1"></i> Eliminar
                                 </button>
+                                }
                             </div>
                         </td>
                     </tr>
@@ -340,9 +349,11 @@ else
     private List<RepresentacionVisual> representacionesVisualesDisponibles = new();
     private List<RepresentacionVisual> representacionesVisualesSeleccionadas = new();
     private int? representacionVisualSeleccionadaId = null;
+    private List <string> userRoles = new();
 
     [Inject] private IRepository Repository { get; set; } = null!;
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
+    [Inject] private AuthenticationStateProvider AuthenticationStateProvider { get; set; } = null!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -359,6 +370,18 @@ else
         Actores = await Repository.GetAsync<List<Actor>>("api/Actor");
         Fuentes = await Repository.GetAsync<List<Fuente>>("api/Fuente");
         RepresentacionVisual = await Repository.GetAsync<List<RepresentacionVisual>>("api/RepresentacionVisual");
+        
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            // Obtener los roles del usuario
+            userRoles = user.Claims
+            .Where(c => c.Type == ClaimTypes.Role)
+            .Select(c => c.Value)
+            .ToList();
+        }
     }
 
     private void MostrarFormulario()

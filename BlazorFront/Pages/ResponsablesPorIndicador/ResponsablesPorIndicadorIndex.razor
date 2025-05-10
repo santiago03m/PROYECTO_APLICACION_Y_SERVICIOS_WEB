@@ -2,9 +2,12 @@
 
 <h3 class="text-center mt-4">Gestión de Responsables por Indicador</h3>
 <div class="d-flex justify-content-end mb-3">
+    @if (userRoles.Contains("admin"))
+    {
     <button class="btn btn-primary" @onclick="MostrarFormulario">
         <i class="fas fa-plus"></i> Agregar Responsable
     </button>
+    }
 </div>
 
 @if (mostrarAlerta)
@@ -47,13 +50,19 @@ else
                     <td>@r.FkIdIndicador</td>
                     <td>@r.FechaAsignacion.ToString("yyyy-MM-dd")</td>
                     <td>
+                        @if (userRoles.Contains("admin")|| userRoles.Contains("Validador"))
+                        {
                         <button class="btn btn-warning btn-sm me-2" @onclick="() => EditarResponsable(r)">
                             <i class="fas fa-edit"></i> Editar
                         </button>
+                        }
+                        @if (userRoles.Contains("admin"))
+                        {
                         <button class="btn btn-danger btn-sm"
                             @onclick="() => EliminarResponsable(r.FkIdResponsable, r.FkIdIndicador)">
                             <i class="fas fa-trash"></i> Eliminar
                         </button>
+                        }
                     </td>
                 </tr>
             }
@@ -121,10 +130,11 @@ else
     private string? mensajeAlerta;
     private bool mostrarAlerta = false;
     private bool esNuevo = true;
-
+    private List <string> userRoles = new();
 
     [Inject] private IRepository Repository { get; set; } = null!;
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
+    [Inject] private AuthenticationStateProvider AuthenticationStateProvider { get; set; } = null!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -132,6 +142,18 @@ else
         responsables = await Repository.GetAsync<List<ResponsablesPorIndicador>>(url);
         responsablesDisponibles = await Repository.GetAsync<List<Actor>>("api/Actor");
         indicadoresDisponibles = await Repository.GetAsync<List<Indicador>>("api/Indicador");
+        
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            // Obtener los roles del usuario
+            userRoles = user.Claims
+            .Where(c => c.Type == ClaimTypes.Role)
+            .Select(c => c.Value)
+            .ToList();
+        }
     }
 
     private void MostrarFormulario()
