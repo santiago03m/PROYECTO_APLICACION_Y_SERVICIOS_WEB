@@ -8,6 +8,12 @@
         <i class="fas fa-plus"></i> Agregar Numeral
     </button>
     }
+    <div class="input-group ms-3" style="max-width: 300px;">
+        <input type="text" class="form-control" placeholder="Buscar por ID" @bind="idBusqueda" />
+        <button class="btn btn-outline-primary" type="button" @onclick="BuscarPorId" title="Buscar Numeral">
+            <i class="fas fa-search"></i> Buscar
+        </button>
+    </div>
 </div>
 
 @if (mostrarAlerta)
@@ -34,17 +40,17 @@ else
     <table class="table table-striped table-hover">
         <thead class="table-dark">
             <tr>
-                <th>#</th>
+                <th>ID</th>
                 <th>Descripción</th>
                 <th>ID Literal</th>
                 <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var (n, index) in numerales.Select((n, i) => (n, i + 1)))
+            @foreach (var n in numerales)
             {
                 <tr>
-                    <td>@index</td>
+                    <td>@n.Id</td>
                     <td>@n.Descripcion</td>
                     <td>@n.FkIdLiteral</td>
                     <td>
@@ -111,6 +117,37 @@ else
     </div>
 }
 
+@if (mostrarModalBusqueda)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(2px);">
+        <div class="modal-dialog">
+            <div class="modal-content shadow-lg rounded-4 border-0">
+                <div class="modal-header">
+                    <h5 class="modal-title">Detalle del Numeral</h5>
+                    <button type="button" class="btn-close" @onclick="CerrarModalBusqueda"></button>
+                </div>
+                <div class="modal-body">
+                    @if (numeralBuscado != null)
+                    {
+                        <dl class="row">
+                            <dt class="col-sm-4">ID</dt>
+                            <dd class="col-sm-8">@numeralBuscado.Id</dd>
+                            <dt class="col-sm-4">Descripción</dt>
+                            <dd class="col-sm-8">@numeralBuscado.Descripcion</dd>
+                            <dt class="col-sm-4">Literal</dt>
+                            <dd class="col-sm-8">@litelaresDisponibles.FirstOrDefault(l => l.Id == numeralBuscado.FkIdLiteral)?.Descripcion</dd>
+                        </dl>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning">No se encontró un numeral con ese ID.</div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
     private List<Numeral> numerales = new();
     private List<Literal> litelaresDisponibles = new();
@@ -119,6 +156,9 @@ else
     private string? mensajeAlerta;
     private bool mostrarAlerta = false;
     private List <string> userRoles = new();
+    private string idBusqueda = string.Empty;
+    private bool mostrarModalBusqueda = false;
+    private Numeral? numeralBuscado;
 
     [Inject] private IRepository Repository { get; set; } = null!;
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
@@ -194,5 +234,24 @@ else
     private void Cancelar()
     {
         mostrarFormulario = false;
+    }
+
+    private async Task BuscarPorId()
+    {
+        mostrarModalBusqueda = false;
+        numeralBuscado = null;
+        if (string.IsNullOrWhiteSpace(idBusqueda))
+        {
+            mensajeAlerta = "Ingrese un ID válido";
+            mostrarAlerta = true;
+            return;
+        }
+        numeralBuscado = await Repository.GetByIDAsync<Numeral>("api/Numeral", idBusqueda);
+        mostrarModalBusqueda = true;
+    }
+    private void CerrarModalBusqueda()
+    {
+        mostrarModalBusqueda = false;
+        numeralBuscado = null;
     }
 }

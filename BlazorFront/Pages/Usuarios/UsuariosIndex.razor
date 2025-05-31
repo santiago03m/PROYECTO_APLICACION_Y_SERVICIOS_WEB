@@ -2,11 +2,47 @@
 @attribute [Authorize(Roles = "admin")]
 
 <h3 class="text-center mt-4">Gestión de Usuarios</h3>
-<div class="d-flex justify-content-end mb-3">
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <input type="text" class="form-control d-inline-block w-auto me-2" placeholder="Buscar por Email" @bind="emailBusqueda" />
+        <button class="btn btn-info" @onclick="BuscarPorEmail" disabled="@string.IsNullOrWhiteSpace(emailBusqueda)"><i class="fas fa-search"></i> Buscar</button>
+    </div>
     <button class="btn btn-primary" @onclick="MostrarFormulario">
         <i class="fas fa-plus"></i> Agregar Usuario
     </button>
 </div>
+
+@if (mostrarModalBusqueda)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Detalle del Usuario</h5>
+                    <button type="button" class="btn-close" @onclick="CerrarModalBusqueda"></button>
+                </div>
+                <div class="modal-body">
+                    @if (usuarioBusqueda != null)
+                    {
+                        <dl class="row">
+                            <dt class="col-sm-4">Email</dt>
+                            <dd class="col-sm-8">@usuarioBusqueda.Email</dd>
+                            <dt class="col-sm-4">Contraseña</dt>
+                            <dd class="col-sm-8">@usuarioBusqueda.Contrasena</dd>
+                        </dl>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning">No se encontró ningún usuario con ese email.</div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="CerrarModalBusqueda">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 
 @if (mostrarAlerta)
 {
@@ -32,17 +68,15 @@ else
     <table class="table table-striped table-hover">
         <thead class="table-dark">
             <tr>
-                <th>#</th>
                 <th>Email</th>
                 <th>Contraseña</th>
                 <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var (u, index) in usuarios.Select((u, i) => (u, i + 1)))
+            @foreach (var u in usuarios)
             {
                 <tr>
-                    <td>@index</td>
                     <td>@u.Email</td>
                     <td>@u.Contrasena</td>
                     <td>
@@ -101,6 +135,9 @@ else
     private bool mostrarAlerta = false;
 
     private bool esEditar = false;
+    private string emailBusqueda = string.Empty;
+    private bool mostrarModalBusqueda = false;
+    private Usuario? usuarioBusqueda;
 
     [Inject] private IRepository Repository { get; set; } = null!;
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
@@ -166,5 +203,23 @@ else
     private void Cancelar()
     {
         mostrarFormulario = false;
+    }
+
+    private void BuscarPorEmail()
+    {
+        mostrarModalBusqueda = false;
+        usuarioBusqueda = null;
+        if (!string.IsNullOrWhiteSpace(emailBusqueda))
+        {
+            usuarioBusqueda = usuarios.FirstOrDefault(u => u.Email == emailBusqueda);
+        }
+        mostrarModalBusqueda = true;
+    }
+
+    private void CerrarModalBusqueda()
+    {
+        mostrarModalBusqueda = false;
+        usuarioBusqueda = null;
+        emailBusqueda = string.Empty;
     }
 }

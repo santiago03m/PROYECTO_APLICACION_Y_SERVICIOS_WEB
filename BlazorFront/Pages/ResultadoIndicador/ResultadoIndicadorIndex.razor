@@ -1,14 +1,54 @@
 @page "/ResultadoIndicador"
 
 <h3 class="text-center mt-4">Gestión de Resultado Indicador</h3>
-<div class="d-flex justify-content-end mb-3">
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <input type="number" class="form-control d-inline-block w-auto me-2" placeholder="Buscar por ID" @bind="idBusqueda" min="1" />
+        <button class="btn btn-info" @onclick="BuscarPorId" disabled="@(idBusqueda <= 0)"><i class="fas fa-search"></i> Buscar</button>
+    </div>
     @if (userRoles.Contains("admin"))
     {
-    <button class="btn btn-primary" @onclick="MostrarFormulario">
-        <i class="fas fa-plus"></i> Agregar Resultado Indicador
-    </button>
+        <button class="btn btn-primary" @onclick="MostrarFormulario">
+            <i class="fas fa-plus"></i> Agregar Resultado Indicador
+        </button>
     }
 </div>
+
+@if (mostrarModalBusqueda)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Detalle del Resultado Indicador</h5>
+                    <button type="button" class="btn-close" @onclick="CerrarModalBusqueda"></button>
+                </div>
+                <div class="modal-body">
+                    @if (resultadoBusqueda != null)
+                    {
+                        <dl class="row">
+                            <dt class="col-sm-4">ID</dt>
+                            <dd class="col-sm-8">@resultadoBusqueda.Id</dd>
+                            <dt class="col-sm-4">Resultado</dt>
+                            <dd class="col-sm-8">@resultadoBusqueda.Resultado</dd>
+                            <dt class="col-sm-4">Fecha de Cálculo</dt>
+                            <dd class="col-sm-8">@resultadoBusqueda.FechaCalculo.ToString("dd/MM/yyyy HH:mm")</dd>
+                            <dt class="col-sm-4">Indicador</dt>
+                            <dd class="col-sm-8">@NombreIndicadorBusqueda</dd>
+                        </dl>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning">No se encontró ningún resultado con ese ID.</div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="CerrarModalBusqueda">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 
 @if (mostrarAlerta)
 {
@@ -118,6 +158,11 @@ else
     private string? mensajeAlerta;
     private bool mostrarAlerta = false;
     private List <string> userRoles = new();
+    private int idBusqueda = 0;
+    private bool mostrarModalBusqueda = false;
+    private ResultadoIndicador? resultadoBusqueda;
+    private string NombreIndicadorBusqueda = string.Empty;
+    private List<Indicador> indicadoresDisponibles = new();
 
 
     [Inject] private IRepository Repository { get; set; } = null!;
@@ -128,6 +173,7 @@ else
     {
         var url = "api/ResultadoIndicador";
         resultadoIndicadores = await Repository.GetAsync<List<ResultadoIndicador>>(url);
+        indicadoresDisponibles = await Repository.GetAsync<List<Indicador>>("api/Indicador");
         
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
@@ -195,5 +241,30 @@ else
     private void Cancelar()
     {
         mostrarFormulario = false;
+    }
+
+    private async Task BuscarPorId()
+    {
+        mostrarModalBusqueda = false;
+        resultadoBusqueda = null;
+        NombreIndicadorBusqueda = string.Empty;
+        if (idBusqueda > 0)
+        {
+            resultadoBusqueda = resultadoIndicadores.FirstOrDefault(r => r.Id == idBusqueda);
+            if (resultadoBusqueda != null)
+            {
+                var indicador = indicadoresDisponibles.FirstOrDefault(i => i.Id == resultadoBusqueda.FkIdIndicador);
+                NombreIndicadorBusqueda = indicador != null ? $"{indicador.Nombre} (ID: {indicador.Id})" : resultadoBusqueda.FkIdIndicador.ToString();
+            }
+        }
+        mostrarModalBusqueda = true;
+    }
+
+    private void CerrarModalBusqueda()
+    {
+        mostrarModalBusqueda = false;
+        resultadoBusqueda = null;
+        idBusqueda = 0;
+        NombreIndicadorBusqueda = string.Empty;
     }
 }

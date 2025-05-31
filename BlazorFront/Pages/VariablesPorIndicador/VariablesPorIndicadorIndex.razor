@@ -1,14 +1,58 @@
 @page "/VariablesPorIndicador"
 
 <h3 class="text-center mt-4">Gestión de Variables por Indicador</h3>
-<div class="d-flex justify-content-end mb-3">
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <input type="number" class="form-control d-inline-block w-auto me-2" placeholder="Buscar por ID" @bind="idBusqueda" min="1" />
+        <button class="btn btn-info" @onclick="BuscarPorId" disabled="@(idBusqueda <= 0)"><i class="fas fa-search"></i> Buscar</button>
+    </div>
     @if (userRoles.Contains("admin"))
     {
-    <button class="btn btn-primary" @onclick="MostrarFormulario">
-        <i class="fas fa-plus"></i> Agregar Variable
-    </button>
+        <button class="btn btn-primary" @onclick="MostrarFormulario">
+            <i class="fas fa-plus"></i> Agregar Variable
+        </button>
     }
 </div>
+
+@if (mostrarModalBusqueda)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Detalle de la Variable por Indicador</h5>
+                    <button type="button" class="btn-close" @onclick="CerrarModalBusqueda"></button>
+                </div>
+                <div class="modal-body">
+                    @if (variableBusqueda != null)
+                    {
+                        <dl class="row">
+                            <dt class="col-sm-4">ID</dt>
+                            <dd class="col-sm-8">@variableBusqueda.Id</dd>
+                            <dt class="col-sm-4">ID Variable</dt>
+                            <dd class="col-sm-8">@variableBusqueda.FkIdVariable</dd>
+                            <dt class="col-sm-4">ID Indicador</dt>
+                            <dd class="col-sm-8">@variableBusqueda.FkIdIndicador</dd>
+                            <dt class="col-sm-4">Dato</dt>
+                            <dd class="col-sm-8">@variableBusqueda.Dato</dd>
+                            <dt class="col-sm-4">Email Usuario</dt>
+                            <dd class="col-sm-8">@variableBusqueda.FkEmailUsuario</dd>
+                            <dt class="col-sm-4">Fecha Dato</dt>
+                            <dd class="col-sm-8">@variableBusqueda.FechaDato.ToString("yyyy-MM-dd")</dd>
+                        </dl>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning">No se encontró ninguna variable con ese ID.</div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="CerrarModalBusqueda">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 
 @if (mostrarAlerta)
 {
@@ -34,7 +78,7 @@ else
     <table class="table table-striped table-hover">
         <thead class="table-dark">
             <tr>
-                <th>#</th>
+                <th>ID</th>
                 <th>ID Variable</th>
                 <th>ID Indicador</th>
                 <th>Dato</th>
@@ -44,10 +88,10 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (var (v, index) in variablesPorIndicador.Select((v, i) => (v, i + 1)))
+            @foreach (var v in variablesPorIndicador)
             {
                 <tr>
-                    <td>@index</td>
+                    <td>@v.Id</td>
                     <td>@v.FkIdVariable</td>
                     <td>@v.FkIdIndicador</td>
                     <td>@v.Dato</td>
@@ -140,7 +184,9 @@ else
     private string? mensajeAlerta;
     private bool mostrarAlerta = false;
     private List <string> userRoles = new();
-
+    private int idBusqueda = 0;
+    private bool mostrarModalBusqueda = false;
+    private VariablesPorIndicador? variableBusqueda;
 
     [Inject] private IRepository Repository { get; set; } = null!;
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
@@ -223,5 +269,23 @@ else
     private void Cancelar()
     {
         mostrarFormulario = false;
+    }
+
+    private void BuscarPorId()
+    {
+        mostrarModalBusqueda = false;
+        variableBusqueda = null;
+        if (idBusqueda > 0)
+        {
+            variableBusqueda = variablesPorIndicador.FirstOrDefault(v => v.Id == idBusqueda);
+        }
+        mostrarModalBusqueda = true;
+    }
+
+    private void CerrarModalBusqueda()
+    {
+        mostrarModalBusqueda = false;
+        variableBusqueda = null;
+        idBusqueda = 0;
     }
 }

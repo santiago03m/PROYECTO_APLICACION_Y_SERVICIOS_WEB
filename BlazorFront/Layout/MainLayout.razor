@@ -10,9 +10,9 @@
 
     <SidebarSection>
         <Sidebar2 Href="/"
-                  ImageSrc="https://demos.blazorbootstrap.com/images/logo/logo-white.svg"
+                  ImageSrc="icon-192.png"
                   Title="Indicadores"
-                  BadgeText="3ra"
+                  BadgeText="Final"
                   DataProvider="Sidebar2DataProvider"
                   WidthUnit="Unit.Px" />
     </SidebarSection>
@@ -63,30 +63,31 @@
         {
             items.AddRange(new List<NavItem>
             {
-                new NavItem { Id = "2", Href = "TipoIndicadores", IconName = IconName.ListNested, Text = "Tipo Indicador", Match = NavLinkMatch.Prefix },
-                new NavItem { Id = "3", Href = "UnidadMedicion", IconName = IconName.ListNested, Text = "Unidad Medición", Match = NavLinkMatch.Prefix },
-                new NavItem { Id = "4", Href = "SubSeccion", IconName = IconName.ListNested, Text = "Subsección", Match = NavLinkMatch.Prefix },
-                new NavItem { Id = "5", Href = "Frecuencia", IconName = IconName.ListNested, Text = "Frecuencia", Match = NavLinkMatch.Prefix },
-                new NavItem { Id = "6", Href = "Sentido", IconName = IconName.ListNested, Text = "Sentido", Match = NavLinkMatch.Prefix },
-                new NavItem { Id = "7", Href = "Seccion", IconName = IconName.ListNested, Text = "Sección", Match = NavLinkMatch.Prefix },
-                new NavItem { Id = "8", Href = "Rol", IconName = IconName.ListNested, Text = "Rol", Match = NavLinkMatch.Prefix },
-                new NavItem { Id = "9", Href = "Fuente", IconName = IconName.ListNested, Text = "Fuente", Match = NavLinkMatch.Prefix },
-                new NavItem { Id = "10", Href = "TipoActor", IconName = IconName.ListNested, Text = "Tipo Actor", Match = NavLinkMatch.Prefix },
-                new NavItem { Id = "11", Href = "RepresentacionVisual", IconName = IconName.ListNested, Text = "Representación Visual", Match = NavLinkMatch.Prefix },
-                new NavItem { Id = "12", Href = "Usuarios", IconName = IconName.ListNested, Text = "Usuarios", Match = NavLinkMatch.Prefix },
-                new NavItem { Id = "13", Href = "Articulo", IconName = IconName.ListNested, Text = "Articulo", Match = NavLinkMatch.Prefix },
-                new NavItem { Id = "14", Href = "FuentePorIndicador", IconName = IconName.ListNested, Text = "Fuente por Indicador", Match = NavLinkMatch.Prefix },
-                new NavItem { Id = "15", Href = "ResultadoIndicador", IconName = IconName.ListNested, Text = "Resultado Indicador", Match = NavLinkMatch.Prefix },
-                new NavItem { Id = "16", Href = "Actor", IconName = IconName.ListNested, Text = "Actor", Match = NavLinkMatch.Prefix },
-                new NavItem { Id = "17", Href = "Literal", IconName = IconName.ListNested, Text = "Literal", Match = NavLinkMatch.Prefix },
-                new NavItem { Id = "18", Href = "Numeral", IconName = IconName.ListNested, Text = "Numeral", Match = NavLinkMatch.Prefix },
-                new NavItem { Id = "19", Href = "Paragrafo", IconName = IconName.ListNested, Text = "Paragrafo", Match = NavLinkMatch.Prefix },
-                new NavItem { Id = "20", Href = "Variable", IconName = IconName.ListNested, Text = "Variable", Match = NavLinkMatch.Prefix },
-                new NavItem { Id = "21", Href = "RolUsuario", IconName = IconName.ListNested, Text = "Rol Usuario", Match = NavLinkMatch.Prefix },
-                new NavItem { Id = "22", Href = "Indicador", IconName = IconName.ListNested, Text = "Indicador", Match = NavLinkMatch.Prefix },
-                new NavItem { Id = "23", Href = "VariablesPorIndicador", IconName = IconName.ListNested, Text = "Variables por Indicador", Match = NavLinkMatch.Prefix },
-                new NavItem { Id = "24", Href = "RepresenVisualPorIndicador", IconName = IconName.ListNested, Text = "RepresenVisualPorIndicador", Match = NavLinkMatch.Prefix },
-                new NavItem { Id = "25", Href = "ResponsablesPorIndicador", IconName = IconName.ListNested, Text = "ResponsablesPorIndicador", Match = NavLinkMatch.Prefix }
+                new NavItem { Id = "2", Href = "TipoIndicadores", IconName = IconName.ListCheck, Text = "Tipo Indicador", Match = NavLinkMatch.Prefix },
+                new NavItem { Id = "3", Href = "UnidadMedicion", IconName = IconName.Rulers, Text = "Unidad Medición", Match = NavLinkMatch.Prefix },
+                new NavItem { Id = "4", Href = "SubSeccion", IconName = IconName.ColumnsGap, Text = "Subsección", Match = NavLinkMatch.Prefix },
+                new NavItem { Id = "5", Href = "Frecuencia", IconName = IconName.ClockHistory, Text = "Frecuencia", Match = NavLinkMatch.Prefix },
+                new NavItem { Id = "6", Href = "Sentido", IconName = IconName.Compass, Text = "Sentido", Match = NavLinkMatch.Prefix },
+                new NavItem { Id = "7", Href = "Seccion", IconName = IconName.CardList, Text = "Sección", Match = NavLinkMatch.Prefix },
+                new NavItem { Id = "8", Href = "Rol", IconName = IconName.PersonBadge, Text = "Rol", Match = NavLinkMatch.Prefix },
+                new NavItem { Id = "9", Href = "Fuente", IconName = IconName.BookHalf, Text = "Fuente", Match = NavLinkMatch.Prefix },
+                new NavItem { Id = "10", Href = "TipoActor", IconName = IconName.People, Text = "Tipo Actor", Match = NavLinkMatch.Prefix },
+                new NavItem { Id = "11", Href = "RepresentacionVisual", IconName = IconName.BarChart, Text = "Representación Visual", Match = NavLinkMatch.Prefix },
+                new NavItem { Id = "12", Href = "Usuarios", IconName = IconName.PersonLinesFill, Text = "Usuarios", Match = NavLinkMatch.Prefix },
+                new NavItem { Id = "13", Href = "Articulo", IconName = IconName.FileText, Text = "Articulo", Match = NavLinkMatch.Prefix },
+                new NavItem { Id = "14", Href = "FuentePorIndicador", IconName = IconName.Link45Deg, Text = "Fuente por Indicador", Match = NavLinkMatch.Prefix },
+                new NavItem { Id = "15", Href = "ResultadoIndicador", IconName = IconName.GraphUp, Text = "Resultado Indicador", Match = NavLinkMatch.Prefix },
+                new NavItem { Id = "16", Href = "Actor", IconName = IconName.PersonCircle, Text = "Actor", Match = NavLinkMatch.Prefix },
+                new NavItem { Id = "17", Href = "Literal", IconName = IconName.Quote, Text = "Literal", Match = NavLinkMatch.Prefix },
+                new NavItem { Id = "18", Href = "Numeral", IconName = IconName.Hash, Text = "Numeral", Match = NavLinkMatch.Prefix },
+                new NavItem { Id = "19", Href = "Paragrafo", IconName = IconName.Paragraph, Text = "Paragrafo", Match = NavLinkMatch.Prefix },
+                new NavItem { Id = "20", Href = "Variable", IconName = IconName.Braces, Text = "Variable", Match = NavLinkMatch.Prefix },
+                new NavItem { Id = "21", Href = "RolUsuario", IconName = IconName.ShieldLock, Text = "Rol Usuario", Match = NavLinkMatch.Prefix },
+                new NavItem { Id = "22", Href = "Indicador", IconName = IconName.Speedometer, Text = "Indicador", Match = NavLinkMatch.Prefix },
+                new NavItem { Id = "23", Href = "VariablesPorIndicador", IconName = IconName.ArrowRepeat, Text = "Variables por Indicador", Match = NavLinkMatch.Prefix },
+                new NavItem { Id = "24", Href = "RepresenVisualPorIndicador", IconName = IconName.Diagram2, Text = "RepresenVisualPorIndicador", Match = NavLinkMatch.Prefix },
+                new NavItem { Id = "25", Href = "ResponsablesPorIndicador", IconName = IconName.PersonWorkspace, Text = "ResponsablesPorIndicador", Match = NavLinkMatch.Prefix }
+
             });
         }
 

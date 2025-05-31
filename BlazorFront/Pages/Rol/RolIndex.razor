@@ -1,12 +1,16 @@
 ﻿@page "/Rol"
 
 <h3 class="text-center mt-4">Gestión de Roles</h3>
-<div class="d-flex justify-content-end mb-3">
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <input type="number" class="form-control d-inline-block w-auto me-2" placeholder="Buscar por ID" @bind="idBusqueda" min="1" />
+        <button class="btn btn-info" @onclick="BuscarPorId" disabled="@(idBusqueda <= 0)"><i class="fas fa-search"></i> Buscar</button>
+    </div>
     @if (userRoles.Contains("admin"))
     {
-    <button class="btn btn-primary" @onclick="MostrarFormulario">
-        <i class="fas fa-plus"></i> Agregar Rol
-    </button>
+        <button class="btn btn-primary" @onclick="MostrarFormulario">
+            <i class="fas fa-plus"></i> Agregar Rol
+        </button>
     }
 </div>
 
@@ -95,6 +99,38 @@ else
     </div>
 }
 
+@if (mostrarModalBusqueda)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Detalle del Rol</h5>
+                    <button type="button" class="btn-close" @onclick="CerrarModalBusqueda"></button>
+                </div>
+                <div class="modal-body">
+                    @if (rolBusqueda != null)
+                    {
+                        <dl class="row">
+                            <dt class="col-sm-4">ID</dt>
+                            <dd class="col-sm-8">@rolBusqueda.Id</dd>
+                            <dt class="col-sm-4">Nombre</dt>
+                            <dd class="col-sm-8">@rolBusqueda.Nombre</dd>
+                        </dl>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning">No se encontró ningún rol con ese ID.</div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="CerrarModalBusqueda">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
     private List<Rol> roles = new();
     private Rol rol = new();
@@ -102,7 +138,9 @@ else
     private string? mensajeAlerta;
     private bool mostrarAlerta = false;
     private List <string> userRoles = new();
-
+    private int idBusqueda = 0;
+    private bool mostrarModalBusqueda = false;
+    private Rol? rolBusqueda;
 
     [Inject] private IRepository Repository { get; set; } = null!;
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
@@ -171,5 +209,23 @@ else
     private void Cancelar()
     {
         mostrarFormulario = false;
+    }
+
+    private void BuscarPorId()
+    {
+        mostrarModalBusqueda = false;
+        rolBusqueda = null;
+        if (idBusqueda > 0)
+        {
+            rolBusqueda = roles.FirstOrDefault(r => r.Id == idBusqueda);
+        }
+        mostrarModalBusqueda = true;
+    }
+
+    private void CerrarModalBusqueda()
+    {
+        mostrarModalBusqueda = false;
+        rolBusqueda = null;
+        idBusqueda = 0;
     }
 }

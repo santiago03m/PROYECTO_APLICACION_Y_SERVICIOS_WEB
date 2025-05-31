@@ -9,6 +9,12 @@
         <i class="fas fa-plus me-1"></i> Agregar Indicador
     </button>
     }
+    <div class="input-group ms-3" style="max-width: 300px;">
+        <input type="number" class="form-control" placeholder="Buscar por ID" @bind="idBusqueda" min="1" />
+        <button class="btn btn-outline-primary" type="button" @onclick="BuscarPorId" title="Buscar Indicador">
+            <i class="fas fa-search"></i> Buscar
+        </button>
+    </div>
 </div>
 
 @if (mostrarAlerta)
@@ -298,6 +304,32 @@ else
                                         Añadir Representación Visual
                                     </button>
                                 </div>
+                                <div class="mb-3 mt-3">
+                                    <label class="form-label">Variables:</label>
+                                    <div class="d-flex flex-wrap">
+                                        @foreach (var variable in variablesSeleccionadas)
+                                        {
+                                            <div class="badge bg-primary text-white rounded-pill d-flex align-items-center me-2 mb-2 px-3 py-2">
+                                                <span class="me-2">@variable.Nombre</span>
+                                                <button type="button" class="btn-close btn-sm ms-2 d-flex align-items-center"
+                                                    @onclick="() => QuitarVariable(variable)">
+                                                </button>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="input-group">
+                                    <InputSelect class="form-select" @bind-Value="variableSelecconadaId">
+                                        <option value="">-- Seleccione Variables --</option>
+                                        @foreach (var variable in variablesDisponibles)
+                                        {
+                                            <option value="@variable.Id">@variable.Nombre</option>
+                                        }
+                                    </InputSelect>
+                                    <button class="btn btn-primary" type="button" @onclick="AgregarVariable" disabled="@(!variableSelecconadaId.HasValue)">
+                                        Añadir Variable
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         <div class="card mt-3 border-0 bg-light">
@@ -311,6 +343,129 @@ else
                             </div>
                         </div>
                     </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (mostrarModalBusqueda)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(2px);">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content shadow-lg rounded-4 border-0">
+                <div class="modal-header">
+                    <h5 class="modal-title">Detalle del Indicador</h5>
+                    <button type="button" class="btn-close" @onclick="CerrarModalBusqueda"></button>
+                </div>
+                <div class="modal-body">
+                    @if (indicadorBuscado != null)
+                    {
+                        <div class="row">
+                            <div class="col-lg-6 col-12">
+                                <dl class="row">
+                                    <dt class="col-sm-4">Código</dt>
+                                    <dd class="col-sm-8">@indicadorBuscado.Codigo</dd>
+                                    <dt class="col-sm-4">Nombre</dt>
+                                    <dd class="col-sm-8">@indicadorBuscado.Nombre</dd>
+                                    <dt class="col-sm-4">Objetivo</dt>
+                                    <dd class="col-sm-8">@indicadorBuscado.Objetivo</dd>
+                                    <dt class="col-sm-4">Alcance</dt>
+                                    <dd class="col-sm-8">@indicadorBuscado.Alcance</dd>
+                                    <dt class="col-sm-4">Fórmula</dt>
+                                    <dd class="col-sm-8">@indicadorBuscado.Formula</dd>
+                                    <dt class="col-sm-4">Tipo Indicador</dt>
+                                    <dd class="col-sm-8">@tiposIndicadoresDisponibles.FirstOrDefault(t => t.Id == indicadorBuscado.FkIdTipoIndicador)?.Nombre</dd>
+                                    <dt class="col-sm-4">Unidad Medición</dt>
+                                    <dd class="col-sm-8">@unidadesMedicionDisponibles.FirstOrDefault(u => u.Id == indicadorBuscado.FkIdUnidadMedicion)?.Descripcion</dd>
+                                    <dt class="col-sm-4">Meta</dt>
+                                    <dd class="col-sm-8">@indicadorBuscado.Meta</dd>
+                                    <dt class="col-sm-4">Sentido</dt>
+                                    <dd class="col-sm-8">@sentidosDisponibles.FirstOrDefault(s => s.Id == indicadorBuscado.FkIdSentido)?.Nombre</dd>
+                                    <dt class="col-sm-4">Frecuencia</dt>
+                                    <dd class="col-sm-8">@frecuenciasDisponibles.FirstOrDefault(f => f.Id == indicadorBuscado.FkIdFrecuencia)?.Nombre</dd>
+                                    <dt class="col-sm-4">Artículo</dt>
+                                    <dd class="col-sm-8">@articulosDisponibles.FirstOrDefault(a => a.Id == indicadorBuscado.FkIdArticulo)?.Nombre</dd>
+                                    <dt class="col-sm-4">Literal</dt>
+                                    <dd class="col-sm-8">@literalesDisponibles.FirstOrDefault(l => l.Id == indicadorBuscado.FkIdLiteral)?.Descripcion</dd>
+                                    <dt class="col-sm-4">Numeral</dt>
+                                    <dd class="col-sm-8">@numeralesDisponibles.FirstOrDefault(n => n.Id == indicadorBuscado.FkIdNumeral)?.Descripcion</dd>
+                                    <dt class="col-sm-4">Parágrafo</dt>
+                                    <dd class="col-sm-8">@paragrafosDisponibles.FirstOrDefault(p => p.Id == indicadorBuscado.FkIdParagrafo)?.Descripcion</dd>
+                                </dl>
+                            </div>
+                            <div class="col-lg-6 col-12">
+                                <div class="mb-3">
+                                    <label class="form-label">Responsables:</label>
+                                    <div class="d-flex flex-wrap">
+                                        @if (responsablesBusqueda != null && responsablesBusqueda.Any())
+                                        {
+                                            @foreach (var actor in responsablesBusqueda)
+                                            {
+                                                <span class="badge bg-primary text-white rounded-pill me-2 mb-2 px-3 py-2">@actor.Nombre</span>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Sin responsables</span>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Fuentes:</label>
+                                    <div class="d-flex flex-wrap">
+                                        @if (fuentesBusqueda != null && fuentesBusqueda.Any())
+                                        {
+                                            @foreach (var fuente in fuentesBusqueda)
+                                            {
+                                                <span class="badge bg-primary text-white rounded-pill me-2 mb-2 px-3 py-2">@fuente.Nombre</span>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Sin fuentes</span>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Representaciones Visuales:</label>
+                                    <div class="d-flex flex-wrap">
+                                        @if (representacionesBusqueda != null && representacionesBusqueda.Any())
+                                        {
+                                            @foreach (var rep in representacionesBusqueda)
+                                            {
+                                                <span class="badge bg-primary text-white rounded-pill me-2 mb-2 px-3 py-2">@rep.Nombre</span>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Sin representaciones</span>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Variables:</label>
+                                    <div class="d-flex flex-wrap">
+                                        @if (variablesBusqueda != null && variablesBusqueda.Any())
+                                        {
+                                            @foreach (var variable in variablesBusqueda)
+                                            {
+                                                <span class="badge bg-primary text-white rounded-pill me-2 mb-2 px-3 py-2">@variable.Nombre</span>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Sin variables</span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning">No se encontró un indicador con ese ID.</div>
+                    }
                 </div>
             </div>
         </div>
@@ -349,6 +504,12 @@ else
     private List<RepresentacionVisual> representacionesVisualesDisponibles = new();
     private List<RepresentacionVisual> representacionesVisualesSeleccionadas = new();
     private int? representacionVisualSeleccionadaId = null;
+    //VariablesPorIndicador
+    private List<Variable> VariablesPorIndicador = new();
+    private List<Variable> variablesDisponibles = new();
+    private List<Variable> variablesSeleccionadas = new();
+    private int? variableSelecconadaId = null;
+
     private List <string> userRoles = new();
 
     [Inject] private IRepository Repository { get; set; } = null!;
@@ -370,6 +531,7 @@ else
         Actores = await Repository.GetAsync<List<Actor>>("api/Actor");
         Fuentes = await Repository.GetAsync<List<Fuente>>("api/Fuente");
         RepresentacionVisual = await Repository.GetAsync<List<RepresentacionVisual>>("api/RepresentacionVisual");
+        VariablesPorIndicador = await Repository.GetAsync<List<Variable>>("api/Variable");
         
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
@@ -391,6 +553,11 @@ else
         actoresDisponibles = Actores;
         fuentesDisponibles = Fuentes;
         representacionesVisualesDisponibles = RepresentacionVisual;
+        variablesDisponibles = VariablesPorIndicador;
+        responsablesSeleccionados.Clear();
+        fuentesSeleccionadas.Clear();
+        representacionesVisualesSeleccionadas.Clear();
+        variablesSeleccionadas.Clear();
     }
 
     private async Task EditarIndicador(Indicador i)
@@ -438,6 +605,14 @@ else
         await CargarRepresentacionesVisuales();
         // Eliminar los ya seleccionados de la lista de disponibles
         representacionesVisualesDisponibles = representacionesVisualesDisponibles.Where(r => !representacionesVisualesSeleccionadas.Any(rv => rv.Id == r.Id)).ToList();
+
+        // Cargar variables disponibles
+        variablesDisponibles = await Repository.GetAsync<List<Variable>>("api/Variable");
+        // Cargar variables ya asignadas
+        await CargarVariables();
+        // Eliminar las ya seleccionadas de la lista de disponibles
+        variablesDisponibles = variablesDisponibles.Where(v => !variablesSeleccionadas.Any(var => var.Id == v.Id)).ToList();
+
     }
 
     private async Task GuardarIndicador()
@@ -496,6 +671,23 @@ else
                     };
 
                     await Repository.PostAsync("api/RepresenVisualPorIndicador", nuevaRepresentacion);
+                }
+            }
+            // Verificar si hay variables antes de intentar guardarlas
+            if (variablesSeleccionadas != null && variablesSeleccionadas.Any())
+            {
+                foreach (var variable in variablesSeleccionadas)
+                {
+                    var nuevaVariable = new VariablesPorIndicador
+                    {
+                        FkIdIndicador = indicador.Id,
+                        FkIdVariable = variable.Id,
+                        Dato = 0,
+                        FkEmailUsuario = variable.FkEmailUsuario ?? string.Empty, // Asignar el email asociado a la variable
+                        FechaDato = DateTime.Now
+                    };
+
+                    await Repository.PostAsync("api/VariablesPorIndicador", nuevaVariable);
                 }
             }
         }
@@ -598,6 +790,43 @@ else
                     };
 
                     await Repository.PostAsync("api/RepresenVisualPorIndicador", nuevaRepresentacion);
+                }
+            }
+
+            //Obtenemos todas las variables actuales
+            var variablesActuales = await Repository.GetAsync<List<VariablesPorIndicador>>("api/VariablesPorIndicador");
+            //filtrar las variables del indicador actual
+            var variablesDelIndicador = variablesActuales.Where(v => v.FkIdIndicador == indicador.Id).ToList();
+            // Crear listas de IDs para la comparación
+            var variablesActualesIds = variablesDelIndicador.Select(v => v.FkIdVariable).ToList();
+            var variablesSeleccionadasIds = variablesSeleccionadas.Select(v => v.Id).ToList();
+            // Eliminar las variables que ya no están seleccionadas
+            foreach (var variable in variablesDelIndicador)
+            {
+                if (!variablesSeleccionadasIds.Contains(variable.FkIdVariable))
+                {
+                    await Repository.DeleteAsync($"api/VariablesPorIndicador/{variable.Id}");
+                }
+            }
+            // Agregar las nuevas variables seleccionadas
+            foreach (var variableId in variablesSeleccionadasIds)
+            {
+                if (!variablesActualesIds.Contains(variableId))
+                {
+                    // Obtener la variable seleccionada
+                    var variable = variablesSeleccionadas.FirstOrDefault(v => v.Id == variableId);
+                    string? emailUsuario = variable?.FkEmailUsuario; // Asume que Variable tiene la propiedad EmailUsuario
+
+                    var nuevaVariable = new VariablesPorIndicador
+                    {
+                        FkIdIndicador = indicador.Id,
+                        FkIdVariable = variableId,
+                        Dato = 0,
+                        FkEmailUsuario = emailUsuario ?? string.Empty, // Asignar el email asociado a la variable
+                        FechaDato = DateTime.Now
+                    };
+
+                    await Repository.PostAsync("api/VariablesPorIndicador", nuevaVariable);
                 }
             }
         }
@@ -743,8 +972,127 @@ else
             }
         }
     }
+
+    private void AgregarVariable()
+    {
+        if (variableSelecconadaId.HasValue)
+        {
+            var variable = variablesDisponibles.FirstOrDefault(v => v.Id == variableSelecconadaId);
+            if (variable != null && !variablesSeleccionadas.Any(v => v.Id == variable.Id))
+            {
+                variablesSeleccionadas.Add(variable);
+                variablesDisponibles.Remove(variable);
+                variableSelecconadaId = null;
+            }
+        }
+    }
+
+    private void QuitarVariable(Variable variable)
+    {
+        variablesSeleccionadas.Remove(variable);
+        variablesDisponibles.Add(variable);
+        variableSelecconadaId = null;
+    }
+
+    private async Task CargarVariables()
+    {
+        if (indicador.Id > 0)
+        {
+            // Obtener todas las variables asociadas a cualquier indicador
+            var variablesActuales = await Repository.GetAsync<List<VariablesPorIndicador>>("api/VariablesPorIndicador");
+
+            // Filtrar solo las variables para el indicador actual
+            var variablesDelIndicador = variablesActuales
+            .Where(v => v.FkIdIndicador == indicador.Id)
+            .ToList();
+
+            // Limpiar la lista actual de variables seleccionadas
+            variablesSeleccionadas.Clear();
+
+            // Mapear las variables actuales a una lista que será mostrada como seleccionadas
+            foreach (var v in variablesDelIndicador)
+            {
+                var variable = await Repository.GetByIDAsync<Variable>("api/Variable", v.FkIdVariable);
+                variablesSeleccionadas.Add(variable);
+            }
+        }
+    }
     private void Cancelar()
     {
         mostrarFormulario = false;
+    }
+
+    private int idBusqueda;
+    private bool mostrarModalBusqueda = false;
+    private Indicador? indicadorBuscado;
+    private List<Actor> responsablesBusqueda = new();
+    private List<Fuente> fuentesBusqueda = new();
+    private List<RepresentacionVisual> representacionesBusqueda = new();
+    private List<Variable> variablesBusqueda = new();
+
+    private async Task BuscarPorId()
+    {
+        mostrarModalBusqueda = false;
+        indicadorBuscado = null;
+        responsablesBusqueda.Clear();
+        fuentesBusqueda.Clear();
+        representacionesBusqueda.Clear();
+        variablesBusqueda.Clear();
+
+        if (idBusqueda <= 0)
+        {
+            mensajeAlerta = "Ingrese un ID válido (mayor a 0)";
+            mostrarAlerta = true;
+            return;
+        }
+        indicadorBuscado = await Repository.GetByIDAsync<Indicador>("api/Indicador", idBusqueda);
+        if (indicadorBuscado == null)
+        {
+            mostrarModalBusqueda = true;
+            return;
+        }
+        // Cargar responsables
+        var responsablesActuales = await Repository.GetAsync<List<ResponsablesPorIndicador>>("api/ResponsablesPorIndicador");
+        var responsablesDelIndicador = responsablesActuales.Where(r => r.FkIdIndicador == indicadorBuscado.Id).ToList();
+        foreach (var r in responsablesDelIndicador)
+        {
+            var responsable = await Repository.GetByIDAsync<Actor>("api/Actor", r.FkIdResponsable);
+            if (responsable != null) responsablesBusqueda.Add(responsable);
+        }
+        // Cargar fuentes
+        var fuentesActuales = await Repository.GetAsync<List<FuentePorIndicador>>("api/FuentePorIndicador");
+        var fuentesDelIndicador = fuentesActuales.Where(f => f.FkIdIndicador == indicadorBuscado.Id).ToList();
+        foreach (var f in fuentesDelIndicador)
+        {
+            var fuente = await Repository.GetByIDAsync<Fuente>("api/Fuente", f.FkIdFuente);
+            if (fuente != null) fuentesBusqueda.Add(fuente);
+        }
+        // Cargar representaciones visuales
+        var representacionesActuales = await Repository.GetAsync<List<RepresenVisualPorIndicador>>("api/RepresenVisualPorIndicador");
+        var representacionesDelIndicador = representacionesActuales.Where(r => r.FkIdIndicador == indicadorBuscado.Id).ToList();
+        foreach (var r in representacionesDelIndicador)
+        {
+            var rep = await Repository.GetByIDAsync<RepresentacionVisual>("api/RepresentacionVisual", r.FkIdRepresenVisual);
+            if (rep != null) representacionesBusqueda.Add(rep);
+        }
+        // Cargar variables
+        var variablesActuales = await Repository.GetAsync<List<VariablesPorIndicador>>("api/VariablesPorIndicador");
+        var variablesDelIndicador = variablesActuales.Where(v => v.FkIdIndicador == indicadorBuscado.Id).ToList();
+        foreach (var v in variablesDelIndicador)
+        {
+            var variable = await Repository.GetByIDAsync<Variable>("api/Variable", v.FkIdVariable);
+            if (variable != null) variablesBusqueda.Add(variable);
+        }
+        mostrarModalBusqueda = true;
+    }
+
+    private void CerrarModalBusqueda()
+    {
+        mostrarModalBusqueda = false;
+        indicadorBuscado = null;
+        responsablesBusqueda.Clear();
+        fuentesBusqueda.Clear();
+        representacionesBusqueda.Clear();
+        variablesBusqueda.Clear();
     }
 }

@@ -34,17 +34,17 @@ else
     <table class="table table-striped table-hover">
         <thead class="table-dark">
             <tr>
-                <th>#</th>
+                <th>ID</th>
                 <th>Nombre</th>
                 <th>ID Tipo Actor</th>
                 <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var (a, index) in actores.Select((a, i) => (a, i + 1)))
+            @foreach (var a in actores)
             {
                 <tr>
-                    <td>@index</td>
+                    <td>@a.Id</td>
                     <td>@a.Nombre</td>
                     <td>@a.FkIdTipoActor</td>
                     <td>
@@ -66,6 +66,44 @@ else
             }
         </tbody>
     </table>
+}
+
+<div class="input-group ms-3" style="max-width: 300px;">
+    <input type="text" class="form-control" placeholder="Buscar por ID" @bind="idBusqueda" />
+    <button class="btn btn-outline-primary" type="button" @onclick="BuscarPorId" title="Buscar Actor">
+        <i class="fas fa-search"></i> Buscar
+    </button>
+</div>
+
+@if (mostrarModalBusqueda)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(2px);">
+        <div class="modal-dialog">
+            <div class="modal-content shadow-lg rounded-4 border-0">
+                <div class="modal-header">
+                    <h5 class="modal-title">Detalle del Actor</h5>
+                    <button type="button" class="btn-close" @onclick="CerrarModalBusqueda"></button>
+                </div>
+                <div class="modal-body">
+                    @if (actorBuscado != null)
+                    {
+                        <dl class="row">
+                            <dt class="col-sm-4">ID</dt>
+                            <dd class="col-sm-8">@actorBuscado.Id</dd>
+                            <dt class="col-sm-4">Nombre</dt>
+                            <dd class="col-sm-8">@actorBuscado.Nombre</dd>
+                            <dt class="col-sm-4">Tipo Actor</dt>
+                            <dd class="col-sm-8">@tipoActoresDisponibles.FirstOrDefault(t => t.Id == actorBuscado.FkIdTipoActor)?.Nombre</dd>
+                        </dl>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning">No se encontró un actor con ese ID.</div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
 }
 
 @if (mostrarFormulario)
@@ -120,6 +158,9 @@ else
     private string? mensajeAlerta;
     private bool mostrarAlerta = false;
     private List <string> userRoles = new();
+    private string idBusqueda = string.Empty;
+    private bool mostrarModalBusqueda = false;
+    private Actor? actorBuscado;
 
     [Inject] private IRepository Repository { get; set; } = null!;
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
@@ -196,5 +237,24 @@ else
     private void Cancelar()
     {
         mostrarFormulario = false;
+    }
+
+    private async Task BuscarPorId()
+    {
+        mostrarModalBusqueda = false;
+        actorBuscado = null;
+        if (string.IsNullOrWhiteSpace(idBusqueda))
+        {
+            mensajeAlerta = "Ingrese un ID válido";
+            mostrarAlerta = true;
+            return;
+        }
+        actorBuscado = await Repository.GetByIDAsync<Actor>("api/Actor", idBusqueda);
+        mostrarModalBusqueda = true;
+    }
+    private void CerrarModalBusqueda()
+    {
+        mostrarModalBusqueda = false;
+        actorBuscado = null;
     }
 }
