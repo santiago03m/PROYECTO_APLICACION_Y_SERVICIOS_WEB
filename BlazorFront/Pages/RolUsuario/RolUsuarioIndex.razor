@@ -2,9 +2,12 @@
 
 <h3 class="text-center mt-4">Gestión de Rol de Usuario</h3>
 <div class="d-flex justify-content-end mb-3">
+    @if (userRoles.Contains("admin"))
+    {
     <button class="btn btn-primary" @onclick="MostrarFormulario">
         <i class="fas fa-plus"></i> Agregar Rol de Usuario
     </button>
+    }
 </div>
 
 @if (mostrarAlerta)
@@ -45,12 +48,18 @@ else
                     <td>@ru.FkEmail</td>
                     <td>@ru.FkIdRol</td>
                     <td>
+                        @if (userRoles.Contains("admin")|| userRoles.Contains("Validador"))
+                        {
                         <button class="btn btn-warning btn-sm me-2" @onclick="() => EditarRolUsuario(ru)">
                             <i class="fas fa-edit"></i> Editar
                         </button>
+                        }
+                        @if (userRoles.Contains("admin"))
+                        {
                         <button class="btn btn-danger btn-sm" @onclick="() => EliminarRolUsuario(ru.FkEmail, ru.FkIdRol)">
                             <i class="fas fa-trash"></i> Eliminar
                         </button>
+                        }
                     </td>
                 </tr>
             }
@@ -70,12 +79,24 @@ else
                 <div class="modal-body">
                     <EditForm Model="rolUsuario" OnValidSubmit="GuardarRolUsuario">
                         <div class="mb-3">
-                            <label class="form-label">Email:</label>
-                            <InputText class="form-control" @bind-Value="rolUsuario.FkEmail" required />
-                        </div>
+                                    <label class="form-label">Email:</label>
+                                    <InputSelect class="form-select" @bind-Value="rolUsuario.FkEmail" required>
+                                        <option disabled value="">-- Seleccione --</option>
+                                        @foreach (var u in UsuariosDisponibles)
+                                        {
+                                            <option value="@u.Email">@u.Email</option>
+                                        }
+                                    </InputSelect>
+                                </div>
                         <div class="mb-3">
                             <label class="form-label">ID Rol:</label>
-                            <InputNumber class="form-control" @bind-Value="rolUsuario.FkIdRol" required />
+                            <InputSelect class="form-select" @bind-Value="rolUsuario.FkIdRol" required>
+                                <option value="">Seleccione un rol</option>
+                                @foreach (var rol in rolesDisponibles)
+                                {
+                                    <option value="@rol.Id">@rol.Nombre</option>
+                                }
+                            </InputSelect>
                         </div>
                         <div class="d-flex justify-content-end">
                             <button type="submit" class="btn btn-success me-2">
@@ -94,18 +115,37 @@ else
 
 @code {
     private List<RolUsuario> rolesUsuarios = new();
+    private List<Rol> rolesDisponibles = new();
+    private List<Usuario> UsuariosDisponibles = new();
     private RolUsuario rolUsuario = new();
     private bool mostrarFormulario = false;
     private string? mensajeAlerta;
     private bool mostrarAlerta = false;
+    private List <string> userRoles = new();
+
 
     [Inject] private IRepository Repository { get; set; } = null!;
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
+    [Inject] private AuthenticationStateProvider AuthenticationStateProvider { get; set; } = null!;
 
     protected override async Task OnInitializedAsync()
     {
         var url = "api/RolUsuario";
         rolesUsuarios = await Repository.GetAsync<List<RolUsuario>>(url);
+        rolesDisponibles = await Repository.GetAsync<List<Rol>>("api/Rol");
+        UsuariosDisponibles = await Repository.GetAsync<List<Usuario>>("api/Usuarios");
+
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            // Obtener los roles del usuario
+            userRoles = user.Claims
+            .Where(c => c.Type == ClaimTypes.Role)
+            .Select(c => c.Value)
+            .ToList();
+        }
     }
 
     private void MostrarFormulario()

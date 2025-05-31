@@ -1,16 +1,131 @@
 ﻿@inherits LayoutComponentBase
-<div class="page">
-    <div class="sidebar">
-        <NavMenu/>
-    </div>
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+<BlazorBootstrapLayout StickyHeader="true">
+    <HeaderSection>
+        <ThemeSwitcher Class="ps-3 ps-lg-2 dropstart" />
+        <div class="auth-links">
+            <AuthLinks />
         </div>
+    </HeaderSection>
 
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
+    <SidebarSection>
+        <Sidebar2 Href="/"
+                  ImageSrc="https://demos.blazorbootstrap.com/images/logo/logo-white.svg"
+                  Title="Indicadores"
+                  BadgeText="3ra"
+                  DataProvider="Sidebar2DataProvider"
+                  WidthUnit="Unit.Px" />
+    </SidebarSection>
+
+    <ContentSection>
+        @Body
+    </ContentSection>
+
+    <FooterSection>
+        <div class="footer-custom text-center text-black py-3">
+            <small>
+                Proyecto Aplicación y Servicios Web por:<br />
+                <strong>Santiago Rueda David</strong> y <strong>Miguel Ángel Giraldo</strong>
+            </small>
+        </div>
+    </FooterSection>
+
+</BlazorBootstrapLayout>
+
+@code {
+    private IEnumerable<NavItem> navItems = default!;
+
+    [Inject] private AuthenticationStateProvider AuthStateProvider { get; set; } = default!;
+
+
+    private async Task<Sidebar2DataProviderResult> Sidebar2DataProvider(Sidebar2DataProviderRequest request)
+    {
+        if (navItems is null)
+        {
+            navItems = await GetNavItemsAsync();
+        }
+        return await Task.FromResult(request.ApplyTo(navItems));    
+    }
+
+    private async Task<IEnumerable<NavItem>> GetNavItemsAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        // Siempre visible
+        var items = new List<NavItem>
+        {
+            new NavItem { Id = "1", Href = "/", IconName = IconName.HouseDoorFill, Text = "Home", Match = NavLinkMatch.All }
+        };
+
+        // Agrega el resto solo si el usuario está autenticado
+        if (user.Identity is { IsAuthenticated: true })
+        {
+            items.AddRange(new List<NavItem>
+            {
+                new NavItem { Id = "2", Href = "TipoIndicadores", IconName = IconName.ListNested, Text = "Tipo Indicador", Match = NavLinkMatch.Prefix },
+                new NavItem { Id = "3", Href = "UnidadMedicion", IconName = IconName.ListNested, Text = "Unidad Medición", Match = NavLinkMatch.Prefix },
+                new NavItem { Id = "4", Href = "SubSeccion", IconName = IconName.ListNested, Text = "Subsección", Match = NavLinkMatch.Prefix },
+                new NavItem { Id = "5", Href = "Frecuencia", IconName = IconName.ListNested, Text = "Frecuencia", Match = NavLinkMatch.Prefix },
+                new NavItem { Id = "6", Href = "Sentido", IconName = IconName.ListNested, Text = "Sentido", Match = NavLinkMatch.Prefix },
+                new NavItem { Id = "7", Href = "Seccion", IconName = IconName.ListNested, Text = "Sección", Match = NavLinkMatch.Prefix },
+                new NavItem { Id = "8", Href = "Rol", IconName = IconName.ListNested, Text = "Rol", Match = NavLinkMatch.Prefix },
+                new NavItem { Id = "9", Href = "Fuente", IconName = IconName.ListNested, Text = "Fuente", Match = NavLinkMatch.Prefix },
+                new NavItem { Id = "10", Href = "TipoActor", IconName = IconName.ListNested, Text = "Tipo Actor", Match = NavLinkMatch.Prefix },
+                new NavItem { Id = "11", Href = "RepresentacionVisual", IconName = IconName.ListNested, Text = "Representación Visual", Match = NavLinkMatch.Prefix },
+                new NavItem { Id = "12", Href = "Usuarios", IconName = IconName.ListNested, Text = "Usuarios", Match = NavLinkMatch.Prefix },
+                new NavItem { Id = "13", Href = "Articulo", IconName = IconName.ListNested, Text = "Articulo", Match = NavLinkMatch.Prefix },
+                new NavItem { Id = "14", Href = "FuentePorIndicador", IconName = IconName.ListNested, Text = "Fuente por Indicador", Match = NavLinkMatch.Prefix },
+                new NavItem { Id = "15", Href = "ResultadoIndicador", IconName = IconName.ListNested, Text = "Resultado Indicador", Match = NavLinkMatch.Prefix },
+                new NavItem { Id = "16", Href = "Actor", IconName = IconName.ListNested, Text = "Actor", Match = NavLinkMatch.Prefix },
+                new NavItem { Id = "17", Href = "Literal", IconName = IconName.ListNested, Text = "Literal", Match = NavLinkMatch.Prefix },
+                new NavItem { Id = "18", Href = "Numeral", IconName = IconName.ListNested, Text = "Numeral", Match = NavLinkMatch.Prefix },
+                new NavItem { Id = "19", Href = "Paragrafo", IconName = IconName.ListNested, Text = "Paragrafo", Match = NavLinkMatch.Prefix },
+                new NavItem { Id = "20", Href = "Variable", IconName = IconName.ListNested, Text = "Variable", Match = NavLinkMatch.Prefix },
+                new NavItem { Id = "21", Href = "RolUsuario", IconName = IconName.ListNested, Text = "Rol Usuario", Match = NavLinkMatch.Prefix },
+                new NavItem { Id = "22", Href = "Indicador", IconName = IconName.ListNested, Text = "Indicador", Match = NavLinkMatch.Prefix },
+                new NavItem { Id = "23", Href = "VariablesPorIndicador", IconName = IconName.ListNested, Text = "Variables por Indicador", Match = NavLinkMatch.Prefix },
+                new NavItem { Id = "24", Href = "RepresenVisualPorIndicador", IconName = IconName.ListNested, Text = "RepresenVisualPorIndicador", Match = NavLinkMatch.Prefix },
+                new NavItem { Id = "25", Href = "ResponsablesPorIndicador", IconName = IconName.ListNested, Text = "ResponsablesPorIndicador", Match = NavLinkMatch.Prefix }
+            });
+        }
+
+        return items;
+    }
+
+    private IEnumerable<NavItem> GetNavItems()
+    {
+        navItems = new List<NavItem>
+        {
+            new NavItem { Id = "1", Href = "/", IconName = IconName.HouseDoorFill, Text = "Home", Match=NavLinkMatch.All},
+            new NavItem { Id = "2", Href = "/counter", IconName = IconName.PlusSquareFill, Text = "Counter"},
+            new NavItem { Id = "4", Href = "TipoIndicadores", IconName = IconName.ListNested, Text = "Tipo Indicador", Match = NavLinkMatch.Prefix },
+            new NavItem { Id = "5", Href = "UnidadMedicion", IconName = IconName.ListNested, Text = "Unidad Medición", Match = NavLinkMatch.Prefix },
+            new NavItem { Id = "6", Href = "SubSeccion", IconName = IconName.ListNested, Text = "Subsección", Match = NavLinkMatch.Prefix },
+            new NavItem { Id = "7", Href = "Frecuencia", IconName = IconName.ListNested, Text = "Frecuencia", Match = NavLinkMatch.Prefix },
+            new NavItem { Id = "8", Href = "Sentido", IconName = IconName.ListNested, Text = "Sentido", Match = NavLinkMatch.Prefix },
+            new NavItem { Id = "9", Href = "Seccion", IconName = IconName.ListNested, Text = "Sección", Match = NavLinkMatch.Prefix },
+            new NavItem { Id = "10", Href = "Rol", IconName = IconName.ListNested, Text = "Rol", Match = NavLinkMatch.Prefix },
+            new NavItem { Id = "11", Href = "Fuente", IconName = IconName.ListNested, Text = "Fuente", Match = NavLinkMatch.Prefix },
+            new NavItem { Id = "12", Href = "TipoActor", IconName = IconName.ListNested, Text = "Tipo Actor", Match = NavLinkMatch.Prefix },
+            new NavItem { Id = "13", Href = "RepresentacionVisual", IconName = IconName.ListNested, Text = "Representación Visual", Match = NavLinkMatch.Prefix },
+            new NavItem { Id = "14", Href = "Usuarios", IconName = IconName.ListNested, Text = "Usuarios", Match = NavLinkMatch.Prefix },
+            new NavItem { Id = "15", Href = "Articulo", IconName = IconName.ListNested, Text = "Articulo", Match = NavLinkMatch.Prefix },
+            new NavItem { Id = "16", Href = "FuentePorIndicador", IconName = IconName.ListNested, Text = "Fuente por Indicador", Match = NavLinkMatch.Prefix },
+            new NavItem { Id = "17", Href = "ResultadoIndicador", IconName = IconName.ListNested, Text = "Resultado Indicador", Match = NavLinkMatch.Prefix },
+            new NavItem { Id = "18", Href = "Actor", IconName = IconName.ListNested, Text = "Actor", Match = NavLinkMatch.Prefix },
+            new NavItem { Id = "19", Href = "Literal", IconName = IconName.ListNested, Text = "Literal", Match = NavLinkMatch.Prefix },
+            new NavItem { Id = "20", Href = "Numeral", IconName = IconName.ListNested, Text = "Numeral", Match = NavLinkMatch.Prefix },
+            new NavItem { Id = "21", Href = "Paragrafo", IconName = IconName.ListNested, Text = "Paragrafo", Match = NavLinkMatch.Prefix },
+            new NavItem { Id = "22", Href = "Variable", IconName = IconName.ListNested, Text = "Variable", Match = NavLinkMatch.Prefix },
+            new NavItem { Id = "23", Href = "RolUsuario", IconName = IconName.ListNested, Text = "Rol Usuario", Match = NavLinkMatch.Prefix },
+            new NavItem { Id = "24", Href = "Indicador", IconName = IconName.ListNested, Text = "Indicador", Match = NavLinkMatch.Prefix },
+            new NavItem { Id = "25", Href = "VariablesPorIndicador", IconName = IconName.ListNested, Text = "Variables por Indicador", Match = NavLinkMatch.Prefix },
+            new NavItem { Id = "26", Href = "RepresenVisualPorIndicador", IconName = IconName.ListNested, Text = "RepresenVisualPorIndicador", Match = NavLinkMatch.Prefix },
+            new NavItem { Id = "27", Href = "ResponsablesPorIndicador", IconName = IconName.ListNested, Text = "ResponsablesPorIndicador", Match = NavLinkMatch.Prefix },
+            
+        };
+
+        return navItems;
+    }
+}

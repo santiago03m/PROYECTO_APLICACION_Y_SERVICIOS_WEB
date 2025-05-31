@@ -13,7 +13,7 @@ namespace BlazorFront.Services
         {
             _httpClient = httpClient;
         }
-        
+
         public JsonSerializerOptions _jsonDefaultOptions => new JsonSerializerOptions() { PropertyNameCaseInsensitive = true };
         public async Task<object> DeleteAsync(string url)
         {
@@ -33,7 +33,7 @@ namespace BlazorFront.Services
         public async Task<T> GetByIDAsync<T>(string url, int id)
         {
             var requestUrl = $"{url}/{id}";
-            var response = await  _httpClient.GetAsync(requestUrl);
+            var response = await _httpClient.GetAsync(requestUrl);
             response.EnsureSuccessStatusCode();
             var content = await response.Content.ReadAsStringAsync();
             return JsonSerializer.Deserialize<T>(content, _jsonDefaultOptions)!;
@@ -48,12 +48,16 @@ namespace BlazorFront.Services
             return JsonSerializer.Deserialize<T>(content, _jsonDefaultOptions)!;
         }
 
-        public async Task<object> PostAsync<T>(string url, T entity)
+        public async Task<T> PostAsync<T>(string url, T entity)
         {
             var content = new StringContent(JsonSerializer.Serialize(entity), Encoding.UTF8, "application/json");
             var response = await _httpClient.PostAsync(url, content);
+
             response.EnsureSuccessStatusCode();
-            return await response.Content.ReadAsStringAsync();
+
+            var responseContent = await response.Content.ReadAsStringAsync();
+
+            return JsonSerializer.Deserialize<T>(responseContent, _jsonDefaultOptions)!;
         }
 
         public async Task<object> PutAsync<T>(string url, T entity)

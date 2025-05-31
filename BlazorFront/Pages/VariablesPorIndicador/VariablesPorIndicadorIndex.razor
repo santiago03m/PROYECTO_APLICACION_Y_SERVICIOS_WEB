@@ -2,8 +2,12 @@
 
 <h3 class="text-center mt-4">Gestión de Variables por Indicador</h3>
 <div class="d-flex justify-content-end mb-3">
+    @if (userRoles.Contains("admin"))
+    {
     <button class="btn btn-primary" @onclick="MostrarFormulario">
-        <i class="fas fa-plus"></i> Agregar Variable</button>
+        <i class="fas fa-plus"></i> Agregar Variable
+    </button>
+    }
 </div>
 
 @if (mostrarAlerta)
@@ -50,12 +54,18 @@ else
                     <td>@v.FkEmailUsuario</td>
                     <td>@v.FechaDato.ToString("yyyy-MM-dd")</td>
                     <td>
+                        @if (userRoles.Contains("admin")|| userRoles.Contains("Validador"))
+                        {
                         <button class="btn btn-warning btn-sm me-2" @onclick="() => EditarVariable(v)">
                             <i class="fas fa-edit"></i> Editar
                         </button>
+                        }
+                        @if (userRoles.Contains("admin"))
+                        {
                         <button class="btn btn-danger btn-sm" @onclick="() => EliminarVariable(v.Id)">
                             <i class="fas fa-trash"></i> Eliminar
                         </button>
+                        }
                     </td>
                 </tr>
             }
@@ -76,11 +86,23 @@ else
                     <EditForm Model="variable" OnValidSubmit="GuardarVariable">
                         <div class="mb-3">
                             <label class="form-label">ID Variable:</label>
-                            <InputNumber class="form-control" @bind-Value="variable.FkIdVariable" required />
+                            <InputSelect class="form-select" @bind-Value="variable.FkIdVariable" required>
+                                <option disabled value="">-- Seleccione --</option>
+                                @foreach (var v in variablesDisponibles)
+                                {
+                                    <option value="@v.Id">@v.Nombre</option>
+                                }
+                            </InputSelect>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">ID Indicador:</label>
-                            <InputNumber class="form-control" @bind-Value="variable.FkIdIndicador" required />
+                            <InputSelect class="form-select" @bind-Value="variable.FkIdIndicador" required>
+                                <option disabled value="">-- Seleccione --</option>
+                                @foreach (var i in indicadoresDisponibles)
+                                {
+                                    <option value="@i.Id">@i.Nombre</option>
+                                }
+                            </InputSelect>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Dato:</label>
@@ -112,17 +134,35 @@ else
 @code {
     private List<VariablesPorIndicador> variablesPorIndicador = new();
     private VariablesPorIndicador variable = new();
+    private List<Variable> variablesDisponibles = new();
+    private List<Indicador> indicadoresDisponibles = new();
     private bool mostrarFormulario = false;
     private string? mensajeAlerta;
     private bool mostrarAlerta = false;
+    private List <string> userRoles = new();
+
 
     [Inject] private IRepository Repository { get; set; } = null!;
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
+    [Inject] private AuthenticationStateProvider AuthenticationStateProvider { get; set; } = null!;
 
     protected override async Task OnInitializedAsync()
     {
         var url = "api/VariablesPorIndicador";
         variablesPorIndicador = await Repository.GetAsync<List<VariablesPorIndicador>>(url);
+        variablesDisponibles = await Repository.GetAsync<List<Variable>>("api/Variable");
+        indicadoresDisponibles = await Repository.GetAsync<List<Indicador>>("api/Indicador");
+        
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            userRoles = user.Claims
+            .Where(c => c.Type == ClaimTypes.Role)
+            .Select(c => c.Value)
+            .ToList();
+        }
     }
 
     private void MostrarFormulario()

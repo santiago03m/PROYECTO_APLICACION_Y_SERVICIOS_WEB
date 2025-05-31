@@ -2,9 +2,12 @@
 
 <h3 class="text-center mt-4">Gestión de Fuente por Indicador</h3>
 <div class="d-flex justify-content-end mb-3">
-    <button class="btn btn-primary" @onclick="MostrarFormulario">
-        <i class="fas fa-plus"></i> Agregar Relación
-    </button>
+    @if (userRoles.Contains("admin"))
+    {
+        <button class="btn btn-primary" @onclick="MostrarFormulario">
+            <i class="fas fa-plus"></i> Agregar Relación
+        </button>
+    }
 </div>
 
 @if (mostrarAlerta)
@@ -45,12 +48,20 @@ else
                     <td>@rel.FkIdFuente</td>
                     <td>@rel.FkIdIndicador</td>
                     <td>
-                        <button class="btn btn-warning btn-sm me-2" @onclick="() => EditarRelacion(rel)">
-                            <i class="fas fa-edit"></i> Editar
-                        </button>
-                        <button class="btn btn-danger btn-sm" @onclick="() => EliminarRelacion(rel.FkIdFuente, rel.FkIdIndicador)">
-                            <i class="fas fa-trash"></i> Eliminar
-                        </button>
+                        @if (userRoles.Contains("admin") || userRoles.Contains("Validador"))
+                        {
+                            <button class="btn btn-warning btn-sm me-2" @onclick="() => EditarRelacion(rel)">
+                                <i class="fas fa-edit"></i> Editar
+                            </button>
+                        }
+
+                        @if (userRoles.Contains("admin"))
+                        {
+                            <button class="btn btn-danger btn-sm"
+                                @onclick="() => EliminarRelacion(rel.FkIdFuente, rel.FkIdIndicador)">
+                                <i class="fas fa-trash"></i> Eliminar
+                            </button>
+                        }
                     </td>
                 </tr>
             }
@@ -71,11 +82,23 @@ else
                     <EditForm Model="relacion" OnValidSubmit="GuardarRelacion">
                         <div class="mb-3">
                             <label class="form-label">ID Fuente:</label>
-                            <InputNumber class="form-control" @bind-Value="relacion.FkIdFuente" required />
+                            <InputSelect class="form-control" @bind-Value="relacion.FkIdFuente" required>
+                                <option value="">Seleccione una fuente</option>
+                                @foreach (var fuente in fuentesDisponibles)
+                                {
+                                    <option value="@fuente.Id">@fuente.Nombre</option>
+                                }
+                            </InputSelect>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">ID Indicador:</label>
-                            <InputNumber class="form-control" @bind-Value="relacion.FkIdIndicador" required />
+                            <InputSelect class="form-control" @bind-Value="relacion.FkIdIndicador" required>
+                                <option value="">Seleccione un indicador</option>
+                                @foreach (var indicador in indicadoresDisponibles)
+                                {
+                                    <option value="@indicador.Id">@indicador.Nombre</option>
+                                }
+                            </InputSelect>
                         </div>
                         <div class="d-flex justify-content-end">
                             <button type="submit" class="btn btn-success me-2">
@@ -94,19 +117,36 @@ else
 
 @code {
     private List<FuentePorIndicador> fuentesPorIndicador = new();
+    private List<Indicador> indicadoresDisponibles = new();
+    private List<Fuente> fuentesDisponibles = new();
     private FuentePorIndicador relacion = new();
     private bool mostrarFormulario = false;
     private bool esNuevo = true;
     private string? mensajeAlerta;
     private bool mostrarAlerta = false;
+    private List<string> userRoles = new();
 
     [Inject] private IRepository Repository { get; set; } = null!;
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
-
+    [Inject] private AuthenticationStateProvider AuthenticationStateProvider { get; set; } = null!;
     protected override async Task OnInitializedAsync()
     {
         var url = "api/FuentePorIndicador";
         fuentesPorIndicador = await Repository.GetAsync<List<FuentePorIndicador>>(url);
+        fuentesDisponibles = await Repository.GetAsync<List<Fuente>>("api/Fuente");
+        indicadoresDisponibles = await Repository.GetAsync<List<Indicador>>("api/Indicador");
+
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            // Obtener los roles del usuario
+            userRoles = user.Claims
+            .Where(c => c.Type == ClaimTypes.Role)
+            .Select(c => c.Value)
+            .ToList();
+        }
     }
 
     private void MostrarFormulario()
@@ -129,18 +169,30 @@ else
 
     private async Task GuardarRelacion()
     {
-        var url = "api/FuentePorIndicador";
-        var compositeKey = $"{relacion.FkIdFuente}/{relacion.FkIdIndicador}";
-        var urlPut = $"api/FuentePorIndicador/{compositeKey}";
+        mostrarFormulario = false;
+        var url1 = "api/FuentePorIndicador";
 
         if (esNuevo)
-            await Repository.PostAsync(url, relacion);
+        {
+            var existe = fuentesPorIndicador.Any(f =>
+            f.FkIdFuente == relacion.FkIdFuente &&
+            f.FkIdIndicador == relacion.FkIdIndicador);
+            if (!existe)
+            {
+                await Repository.PostAsync(url1, relacion);
+                fuentesPorIndicador = await Repository.GetAsync<List<FuentePorIndicador>>(url1);
+                mensajeAlerta = "Relación guardada correctamente";
+            }
+            else
+            {
+                mensajeAlerta = "La relación ya existe";
+            }
+        }
         else
-            await Repository.PutAsync(urlPut, relacion);
-
-        fuentesPorIndicador = await Repository.GetAsync<List<FuentePorIndicador>>(url);
-        mostrarFormulario = false;
-        mensajeAlerta = "Relación guardada correctamente";
+        {
+            mensajeAlerta = "Esta tabla no adimite modificaciones";
+        }
+        fuentesPorIndicador = await Repository.GetAsync<List<FuentePorIndicador>>(url1);
         mostrarAlerta = true;
     }
 

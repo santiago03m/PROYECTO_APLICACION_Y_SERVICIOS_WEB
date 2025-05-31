@@ -2,9 +2,12 @@
 
 <h3 class="text-center mt-4">Gestión de Actor</h3>
 <div class="d-flex justify-content-end mb-3">
+    @if (userRoles.Contains("admin"))
+    {
     <button class="btn btn-primary" @onclick="MostrarFormulario">
         <i class="fas fa-plus"></i> Agregar Actor
     </button>
+    }
 </div>
 
 @if (mostrarAlerta)
@@ -45,12 +48,19 @@ else
                     <td>@a.Nombre</td>
                     <td>@a.FkIdTipoActor</td>
                     <td>
+                        @if (userRoles.Contains("admin")|| userRoles.Contains("Validador"))
+                        {
                         <button class="btn btn-warning btn-sm me-2" @onclick="() => EditarActor(a)">
                             <i class="fas fa-edit"></i> Editar
                         </button>
+                        }
+
+                        @if (userRoles.Contains("admin"))
+                        {
                         <button class="btn btn-danger btn-sm" @onclick="() => EliminarActor(a.Id)">
                             <i class="fas fa-trash"></i> Eliminar
                         </button>
+                        }
                     </td>
                 </tr>
             }
@@ -79,7 +89,13 @@ else
                         </div>
                         <div class="mb-3">
                             <label class="form-label">ID Tipo Actor:</label>
-                            <InputNumber class="form-control" @bind-Value="actor.FkIdTipoActor" required />
+                            <InputSelect class="form-select" @bind-Value="actor.FkIdTipoActor" required>
+                                <option disabled value="">-- Seleccione --</option>
+                                @foreach (var t in tipoActoresDisponibles)
+                                {
+                                    <option value="@t.Id">@t.Nombre</option>
+                                }
+                            </InputSelect>
                         </div>
                         <div class="d-flex justify-content-end">
                             <button type="submit" class="btn btn-success me-2">
@@ -98,18 +114,34 @@ else
 
 @code {
     private List<Actor> actores = new();
+    private List<TipoActor> tipoActoresDisponibles = new();
     private Actor actor = new();
     private bool mostrarFormulario = false;
     private string? mensajeAlerta;
     private bool mostrarAlerta = false;
+    private List <string> userRoles = new();
 
     [Inject] private IRepository Repository { get; set; } = null!;
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
+    [Inject] private AuthenticationStateProvider AuthenticationStateProvider { get; set; } = null!;
 
     protected override async Task OnInitializedAsync()
     {
         var url = "api/Actor";
         actores = await Repository.GetAsync<List<Actor>>(url);
+        tipoActoresDisponibles = await Repository.GetAsync<List<TipoActor>>("api/TipoActor");
+        
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            // Obtener los roles del usuario
+            userRoles = user.Claims
+                .Where(c => c.Type == ClaimTypes.Role)
+                .Select(c => c.Value)
+                .ToList();
+        }
     }
 
     private void MostrarFormulario()

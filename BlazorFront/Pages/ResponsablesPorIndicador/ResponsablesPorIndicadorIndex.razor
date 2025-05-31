@@ -2,9 +2,12 @@
 
 <h3 class="text-center mt-4">Gestión de Responsables por Indicador</h3>
 <div class="d-flex justify-content-end mb-3">
+    @if (userRoles.Contains("admin"))
+    {
     <button class="btn btn-primary" @onclick="MostrarFormulario">
         <i class="fas fa-plus"></i> Agregar Responsable
     </button>
+    }
 </div>
 
 @if (mostrarAlerta)
@@ -47,12 +50,19 @@ else
                     <td>@r.FkIdIndicador</td>
                     <td>@r.FechaAsignacion.ToString("yyyy-MM-dd")</td>
                     <td>
+                        @if (userRoles.Contains("admin")|| userRoles.Contains("Validador"))
+                        {
                         <button class="btn btn-warning btn-sm me-2" @onclick="() => EditarResponsable(r)">
                             <i class="fas fa-edit"></i> Editar
                         </button>
-                        <button class="btn btn-danger btn-sm" @onclick="() => EliminarResponsable(r.FkIdResponsable, r.FkIdIndicador)">
+                        }
+                        @if (userRoles.Contains("admin"))
+                        {
+                        <button class="btn btn-danger btn-sm"
+                            @onclick="() => EliminarResponsable(r.FkIdResponsable, r.FkIdIndicador)">
                             <i class="fas fa-trash"></i> Eliminar
                         </button>
+                        }
                     </td>
                 </tr>
             }
@@ -66,18 +76,31 @@ else
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">@(string.IsNullOrEmpty(responsable.FkIdResponsable) ? "Agregar Responsable" : "Editar Responsable")</h5>
-                    <button type="button" class="btn-close" @onclick="Cancelar"></button>
-                </div>
-                <div class="modal-body">
-                    <EditForm Model="responsable" OnValidSubmit="GuardarResponsable">
-                        <div class="mb-3">
-                            <label class="form-label">ID Responsable:</label>
-                            <InputText class="form-control" @bind-Value="responsable.FkIdResponsable" required />
+                    <h5 class="modal-title">@(string.IsNullOrEmpty(responsable.FkIdResponsable) ? "Agregar Responsable" :
+                                            "Editar Responsable")</h5>
+                <button type="button" class="btn-close" @onclick="Cancelar"></button>
+            </div>
+            <div class="modal-body">
+                <EditForm Model="responsable" OnValidSubmit="GuardarResponsable">
+                    <div class="mb-3">
+                        <label class="form-label">ID Responsable:</label>
+                        <InputSelect class="form-select" @bind-Value="responsable.FkIdResponsable" required>
+                            <option disabled value="">-- Seleccione --</option>
+                            @foreach (var r in responsablesDisponibles)
+                                {
+                                    <option value="@r.Id">@r.Nombre</option>
+                                }
+                            </InputSelect>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">ID Indicador:</label>
-                            <InputNumber class="form-control" @bind-Value="responsable.FkIdIndicador" required />
+                            <InputSelect class="form-select" @bind-Value="responsable.FkIdIndicador" required>
+                                <option disabled value="">-- Seleccione --</option>
+                                @foreach (var i in indicadoresDisponibles)
+                                {
+                                    <option value="@i.Id">@i.Nombre</option>
+                                }
+                            </InputSelect>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Fecha Asignación:</label>
@@ -100,18 +123,37 @@ else
 
 @code {
     private List<ResponsablesPorIndicador> responsables = new();
+    private List<Actor> responsablesDisponibles = new();
+    private List<Indicador> indicadoresDisponibles = new();
     private ResponsablesPorIndicador responsable = new();
     private bool mostrarFormulario = false;
     private string? mensajeAlerta;
     private bool mostrarAlerta = false;
+    private bool esNuevo = true;
+    private List <string> userRoles = new();
 
     [Inject] private IRepository Repository { get; set; } = null!;
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
+    [Inject] private AuthenticationStateProvider AuthenticationStateProvider { get; set; } = null!;
 
     protected override async Task OnInitializedAsync()
     {
         var url = "api/ResponsablesPorIndicador";
         responsables = await Repository.GetAsync<List<ResponsablesPorIndicador>>(url);
+        responsablesDisponibles = await Repository.GetAsync<List<Actor>>("api/Actor");
+        indicadoresDisponibles = await Repository.GetAsync<List<Indicador>>("api/Indicador");
+        
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            // Obtener los roles del usuario
+            userRoles = user.Claims
+            .Where(c => c.Type == ClaimTypes.Role)
+            .Select(c => c.Value)
+            .ToList();
+        }
     }
 
     private void MostrarFormulario()
@@ -120,6 +162,7 @@ else
         {
             FechaAsignacion = DateTime.Now
         };
+        esNuevo = true;
         mostrarFormulario = true;
     }
 
@@ -131,31 +174,43 @@ else
             FkIdIndicador = r.FkIdIndicador,
             FechaAsignacion = r.FechaAsignacion
         };
+        esNuevo = false;
         mostrarFormulario = true;
     }
 
     private async Task GuardarResponsable()
     {
+        mostrarFormulario = false;
         var url1 = "api/ResponsablesPorIndicador";
-        var url2 = $"api/ResponsablesPorIndicador/{responsable.FkIdResponsable}/{responsable.FkIdIndicador}";
 
-        if (string.IsNullOrEmpty(responsable.FkIdResponsable))
-            return;
-
-        var existe = responsables.Any(r =>
+        if (esNuevo)
+        {
+            // Agregar un nuevo responsable
+            var existe = responsables.Any(r =>
             r.FkIdResponsable == responsable.FkIdResponsable &&
             r.FkIdIndicador == responsable.FkIdIndicador);
 
-        if (!existe)
-            await Repository.PostAsync(url1, responsable);
+            if (!existe)
+            {
+                // Realizar la operación de agregar
+                await Repository.PostAsync(url1, responsable);
+                responsables = await Repository.GetAsync<List<ResponsablesPorIndicador>>(url1);
+                mensajeAlerta = "Responsable guardado correctamente";
+            }
+            else
+            {
+                mensajeAlerta = "El responsable ya está asignado al indicador";
+            }
+        }
         else
-            await Repository.PutAsync(url2, responsable);
+        {
+            mensajeAlerta = "Esta tabla no admite modificaciones";
+        }
 
         responsables = await Repository.GetAsync<List<ResponsablesPorIndicador>>(url1);
-        mostrarFormulario = false;
-        mensajeAlerta = "Responsable guardado correctamente";
         mostrarAlerta = true;
     }
+
 
     private async Task EliminarResponsable(string fkidresponsable, int fkidindicador)
     {

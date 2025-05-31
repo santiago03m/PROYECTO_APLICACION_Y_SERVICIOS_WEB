@@ -1,6 +1,9 @@
 
 using CRUD.Backend.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace CRUD.Backend
 {
@@ -28,6 +31,30 @@ namespace CRUD.Backend
             });
             builder.Services.AddDbContext<DataContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer")));
+
+
+            var key = builder.Configuration["Jwt:key"];
+
+            builder.Services.AddAuthentication(config =>
+            {
+                config.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                config.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(config =>
+            {
+                config.RequireHttpsMetadata = false;
+                config.SaveToken = true;
+                config.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero,
+                    RoleClaimType = "role",
+                    IssuerSigningKey = new SymmetricSecurityKey
+                    (Encoding.UTF8.GetBytes(key!))
+                };
+            });
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -41,6 +68,8 @@ namespace CRUD.Backend
             app.UseHttpsRedirection();
 
             app.UseCors("AllowSpecificOrigins");
+
+            app.UseAuthentication();
 
             app.UseAuthorization();
 

@@ -1,5 +1,7 @@
 html, body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: 'Zain', sans-serif;
+    overflow-x: auto !important;
+    font-size: large;
 }
 
 h1:focus {
