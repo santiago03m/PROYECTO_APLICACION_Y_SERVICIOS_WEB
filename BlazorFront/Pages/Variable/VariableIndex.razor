@@ -75,14 +75,14 @@ else
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">@(string.IsNullOrEmpty(variable.Id.ToString()) ? "Agregar Variable" : "Editar Variable")</h5>
+                    <h5 class="modal-title">@(esNuevo ? "Agregar Variable" : "Editar Variable")</h5>
                     <button type="button" class="btn-close" @onclick="Cancelar"></button>
                 </div>
                 <div class="modal-body">
                     <EditForm Model="variable" OnValidSubmit="GuardarVariable">
                         <div class="mb-3">
                             <label class="form-label">ID:</label>
-                            <InputNumber class="form-control" @bind-Value="variable.Id" required />
+                            <InputNumber class="form-control" @bind-Value="variable.Id" readonly=""/>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Nombre:</label>
@@ -122,6 +122,7 @@ else
     private Variable variable = new();
     private List<Usuario> usuariosDisponibles = new();
     private bool mostrarFormulario = false;
+    private bool esNuevo = true;
     private string? mensajeAlerta;
     private bool mostrarAlerta = false;
     private List <string> userRoles = new();
@@ -164,6 +165,7 @@ else
             FechaCreacion = v.FechaCreacion,
             FkEmailUsuario = v.FkEmailUsuario
         };
+        esNuevo = false;
         mostrarFormulario = true;
     }
 
@@ -172,16 +174,16 @@ else
         var url1 = "api/Variable";
         var url2 = $"api/Variable/{variable.Id}";
 
-        if (variable.Id == 0)
-            return;
-
         var existe = variables.Any(v => v.Id == variable.Id);
 
-        if (!existe)
+        if(!existe)
+        {
             await Repository.PostAsync(url1, variable);
+        }
         else
+        {
             await Repository.PutAsync(url2, variable);
-
+        }
         variables = await Repository.GetAsync<List<Variable>>(url1);
         mostrarFormulario = false;
         mensajeAlerta = "Variable guardada correctamente";

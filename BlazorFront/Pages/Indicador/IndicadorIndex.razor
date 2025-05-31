@@ -298,6 +298,32 @@ else
                                         Añadir Representación Visual
                                     </button>
                                 </div>
+                                <div class="mb-3 mt-3">
+                                    <label class="form-label">Variables:</label>
+                                    <div class="d-flex flex-wrap">
+                                        @foreach (var variable in variablesSeleccionadas)
+                                        {
+                                            <div class="badge bg-primary text-white rounded-pill d-flex align-items-center me-2 mb-2 px-3 py-2">
+                                                <span class="me-2">@variable.Nombre</span>
+                                                <button type="button" class="btn-close btn-sm ms-2 d-flex align-items-center"
+                                                    @onclick="() => QuitarVariable(variable)">
+                                                </button>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="input-group">
+                                    <InputSelect class="form-select" @bind-Value="variableSelecconadaId">
+                                        <option value="">-- Seleccione Variables --</option>
+                                        @foreach (var variable in variablesDisponibles)
+                                        {
+                                            <option value="@variable.Id">@variable.Nombre</option>
+                                        }
+                                    </InputSelect>
+                                    <button class="btn btn-primary" type="button" @onclick="AgregarVariable" disabled="@(!variableSelecconadaId.HasValue)">
+                                        Añadir Variable
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         <div class="card mt-3 border-0 bg-light">
@@ -349,6 +375,12 @@ else
     private List<RepresentacionVisual> representacionesVisualesDisponibles = new();
     private List<RepresentacionVisual> representacionesVisualesSeleccionadas = new();
     private int? representacionVisualSeleccionadaId = null;
+    //VariablesPorIndicador
+    private List<Variable> VariablesPorIndicador = new();
+    private List<Variable> variablesDisponibles = new();
+    private List<Variable> variablesSeleccionadas = new();
+    private int? variableSelecconadaId = null;
+
     private List <string> userRoles = new();
 
     [Inject] private IRepository Repository { get; set; } = null!;
@@ -370,6 +402,7 @@ else
         Actores = await Repository.GetAsync<List<Actor>>("api/Actor");
         Fuentes = await Repository.GetAsync<List<Fuente>>("api/Fuente");
         RepresentacionVisual = await Repository.GetAsync<List<RepresentacionVisual>>("api/RepresentacionVisual");
+        VariablesPorIndicador = await Repository.GetAsync<List<Variable>>("api/Variable");
         
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
@@ -391,6 +424,11 @@ else
         actoresDisponibles = Actores;
         fuentesDisponibles = Fuentes;
         representacionesVisualesDisponibles = RepresentacionVisual;
+        variablesDisponibles = VariablesPorIndicador;
+        responsablesSeleccionados.Clear();
+        fuentesSeleccionadas.Clear();
+        representacionesVisualesSeleccionadas.Clear();
+        variablesSeleccionadas.Clear();
     }
 
     private async Task EditarIndicador(Indicador i)
@@ -438,6 +476,14 @@ else
         await CargarRepresentacionesVisuales();
         // Eliminar los ya seleccionados de la lista de disponibles
         representacionesVisualesDisponibles = representacionesVisualesDisponibles.Where(r => !representacionesVisualesSeleccionadas.Any(rv => rv.Id == r.Id)).ToList();
+
+        // Cargar variables disponibles
+        variablesDisponibles = await Repository.GetAsync<List<Variable>>("api/Variable");
+        // Cargar variables ya asignadas
+        await CargarVariables();
+        // Eliminar las ya seleccionadas de la lista de disponibles
+        variablesDisponibles = variablesDisponibles.Where(v => !variablesSeleccionadas.Any(var => var.Id == v.Id)).ToList();
+
     }
 
     private async Task GuardarIndicador()
@@ -496,6 +542,23 @@ else
                     };
 
                     await Repository.PostAsync("api/RepresenVisualPorIndicador", nuevaRepresentacion);
+                }
+            }
+            // Verificar si hay variables antes de intentar guardarlas
+            if (variablesSeleccionadas != null && variablesSeleccionadas.Any())
+            {
+                foreach (var variable in variablesSeleccionadas)
+                {
+                    var nuevaVariable = new VariablesPorIndicador
+                    {
+                        FkIdIndicador = indicador.Id,
+                        FkIdVariable = variable.Id,
+                        Dato = 0,
+                        FkEmailUsuario = variable.FkEmailUsuario ?? string.Empty, // Asignar el email asociado a la variable
+                        FechaDato = DateTime.Now
+                    };
+
+                    await Repository.PostAsync("api/VariablesPorIndicador", nuevaVariable);
                 }
             }
         }
@@ -598,6 +661,43 @@ else
                     };
 
                     await Repository.PostAsync("api/RepresenVisualPorIndicador", nuevaRepresentacion);
+                }
+            }
+
+            //Obtenemos todas las variables actuales
+            var variablesActuales = await Repository.GetAsync<List<VariablesPorIndicador>>("api/VariablesPorIndicador");
+            //filtrar las variables del indicador actual
+            var variablesDelIndicador = variablesActuales.Where(v => v.FkIdIndicador == indicador.Id).ToList();
+            // Crear listas de IDs para la comparación
+            var variablesActualesIds = variablesDelIndicador.Select(v => v.FkIdVariable).ToList();
+            var variablesSeleccionadasIds = variablesSeleccionadas.Select(v => v.Id).ToList();
+            // Eliminar las variables que ya no están seleccionadas
+            foreach (var variable in variablesDelIndicador)
+            {
+                if (!variablesSeleccionadasIds.Contains(variable.FkIdVariable))
+                {
+                    await Repository.DeleteAsync($"api/VariablesPorIndicador/{variable.Id}");
+                }
+            }
+            // Agregar las nuevas variables seleccionadas
+            foreach (var variableId in variablesSeleccionadasIds)
+            {
+                if (!variablesActualesIds.Contains(variableId))
+                {
+                    // Obtener la variable seleccionada
+                    var variable = variablesSeleccionadas.FirstOrDefault(v => v.Id == variableId);
+                    string? emailUsuario = variable?.FkEmailUsuario; // Asume que Variable tiene la propiedad EmailUsuario
+
+                    var nuevaVariable = new VariablesPorIndicador
+                    {
+                        FkIdIndicador = indicador.Id,
+                        FkIdVariable = variableId,
+                        Dato = 0,
+                        FkEmailUsuario = emailUsuario ?? string.Empty, // Asignar el email asociado a la variable
+                        FechaDato = DateTime.Now
+                    };
+
+                    await Repository.PostAsync("api/VariablesPorIndicador", nuevaVariable);
                 }
             }
         }
@@ -740,6 +840,51 @@ else
             {
                 var representacion = await Repository.GetByIDAsync<RepresentacionVisual>("api/RepresentacionVisual", r.FkIdRepresenVisual);
                 representacionesVisualesSeleccionadas.Add(representacion);
+            }
+        }
+    }
+
+    private void AgregarVariable()
+    {
+        if (variableSelecconadaId.HasValue)
+        {
+            var variable = variablesDisponibles.FirstOrDefault(v => v.Id == variableSelecconadaId);
+            if (variable != null && !variablesSeleccionadas.Any(v => v.Id == variable.Id))
+            {
+                variablesSeleccionadas.Add(variable);
+                variablesDisponibles.Remove(variable);
+                variableSelecconadaId = null;
+            }
+        }
+    }
+
+    private void QuitarVariable(Variable variable)
+    {
+        variablesSeleccionadas.Remove(variable);
+        variablesDisponibles.Add(variable);
+        variableSelecconadaId = null;
+    }
+
+    private async Task CargarVariables()
+    {
+        if (indicador.Id > 0)
+        {
+            // Obtener todas las variables asociadas a cualquier indicador
+            var variablesActuales = await Repository.GetAsync<List<VariablesPorIndicador>>("api/VariablesPorIndicador");
+
+            // Filtrar solo las variables para el indicador actual
+            var variablesDelIndicador = variablesActuales
+            .Where(v => v.FkIdIndicador == indicador.Id)
+            .ToList();
+
+            // Limpiar la lista actual de variables seleccionadas
+            variablesSeleccionadas.Clear();
+
+            // Mapear las variables actuales a una lista que será mostrada como seleccionadas
+            foreach (var v in variablesDelIndicador)
+            {
+                var variable = await Repository.GetByIDAsync<Variable>("api/Variable", v.FkIdVariable);
+                variablesSeleccionadas.Add(variable);
             }
         }
     }
