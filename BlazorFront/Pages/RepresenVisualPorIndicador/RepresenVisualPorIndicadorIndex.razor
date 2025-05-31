@@ -8,6 +8,12 @@
         <i class="fas fa-plus"></i> Agregar Relación
     </button>
     }
+    <div class="input-group ms-3" style="max-width: 300px;">
+        <input type="number" class="form-control" placeholder="Buscar por ID Indicador" @bind="idBusquedaIndicador" min="1" />
+        <button class="btn btn-outline-primary" type="button" @onclick="BuscarPorId" title="Buscar Relación">
+            <i class="fas fa-search"></i> Buscar
+        </button>
+    </div>
 </div>
 
 @if (mostrarAlerta)
@@ -34,17 +40,15 @@ else
     <table class="table table-striped table-hover">
         <thead class="table-dark">
             <tr>
-                <th>#</th>
                 <th>ID Indicador</th>
                 <th>ID Representación Visual</th>
                 <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var (r, index) in registros.Select((r, i) => (r, i + 1)))
+            @foreach (var r in registros)
             {
                 <tr>
-                    <td>@index</td>
                     <td>@r.FkIdIndicador</td>
                     <td>@r.FkIdRepresenVisual</td>
                     <td>
@@ -113,6 +117,50 @@ else
     </div>
 }
 
+@if (mostrarModalBusqueda)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(2px);">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content shadow-lg rounded-4 border-0">
+                <div class="modal-header">
+                    <h5 class="modal-title">Relaciones del Indicador</h5>
+                    <button type="button" class="btn-close" @onclick="CerrarModalBusqueda"></button>
+                </div>
+                <div class="modal-body">
+                    @if (relacionesBuscadas != null && relacionesBuscadas.Any())
+                    {
+                        <div class="mb-3">
+                            <strong>ID Indicador:</strong> @idBusquedaIndicador<br />
+                            <strong>Nombre Indicador:</strong> @indicadores.FirstOrDefault(i => i.Id == idBusquedaIndicador)?.Nombre
+                        </div>
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>ID Representación Visual</th>
+                                    <th>Nombre Representación Visual</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var rel in relacionesBuscadas)
+                                {
+                                    <tr>
+                                        <td>@rel.FkIdRepresenVisual</td>
+                                        <td>@representacionesVisuales.FirstOrDefault(rv => rv.Id == rel.FkIdRepresenVisual)?.Nombre</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning">No se encontraron relaciones para ese indicador.</div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
     private List<RepresenVisualPorIndicador> registros = new();
     private List<RepresentacionVisual> representacionesVisuales = new();
@@ -122,6 +170,9 @@ else
     private string? mensajeAlerta;
     private bool mostrarAlerta = false;
     private List <string> userRoles = new();
+    private int idBusquedaIndicador;
+    private bool mostrarModalBusqueda = false;
+    private List<RepresenVisualPorIndicador> relacionesBuscadas = new();
 
 
     [Inject] private IRepository Repository { get; set; } = null!;
@@ -199,5 +250,24 @@ else
     private void Cancelar()
     {
         mostrarFormulario = false;
+    }
+
+    private async Task BuscarPorId()
+    {
+        mostrarModalBusqueda = false;
+        relacionesBuscadas.Clear();
+        if (idBusquedaIndicador <= 0)
+        {
+            mensajeAlerta = "Ingrese un ID de indicador válido (mayor a 0)";
+            mostrarAlerta = true;
+            return;
+        }
+        relacionesBuscadas = registros.Where(r => r.FkIdIndicador == idBusquedaIndicador).ToList();
+        mostrarModalBusqueda = true;
+    }
+    private void CerrarModalBusqueda()
+    {
+        mostrarModalBusqueda = false;
+        relacionesBuscadas.Clear();
     }
 }

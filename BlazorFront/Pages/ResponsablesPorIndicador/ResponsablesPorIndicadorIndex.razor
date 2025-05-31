@@ -8,6 +8,12 @@
         <i class="fas fa-plus"></i> Agregar Responsable
     </button>
     }
+    <div class="input-group ms-3" style="max-width: 300px;">
+        <input type="text" class="form-control" placeholder="Buscar por ID Responsable" @bind="idBusquedaResponsable" />
+        <button class="btn btn-outline-primary" type="button" @onclick="BuscarPorId" title="Buscar Responsable">
+            <i class="fas fa-search"></i> Buscar
+        </button>
+    </div>
 </div>
 
 @if (mostrarAlerta)
@@ -34,7 +40,6 @@ else
     <table class="table table-striped table-hover">
         <thead class="table-dark">
             <tr>
-                <th>#</th>
                 <th>ID Responsable</th>
                 <th>ID Indicador</th>
                 <th>Fecha Asignación</th>
@@ -42,10 +47,9 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (var (r, index) in responsables.Select((r, i) => (r, i + 1)))
+            @foreach (var r in responsables)
             {
                 <tr>
-                    <td>@index</td>
                     <td>@r.FkIdResponsable</td>
                     <td>@r.FkIdIndicador</td>
                     <td>@r.FechaAsignacion.ToString("yyyy-MM-dd")</td>
@@ -90,7 +94,7 @@ else
                                 {
                                     <option value="@r.Id">@r.Nombre</option>
                                 }
-                            </InputSelect>
+                        </InputSelect>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">ID Indicador:</label>
@@ -121,6 +125,52 @@ else
     </div>
 }
 
+@if (mostrarModalBusqueda)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(2px);">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content shadow-lg rounded-4 border-0">
+                <div class="modal-header">
+                    <h5 class="modal-title">Relaciones del Responsable</h5>
+                    <button type="button" class="btn-close" @onclick="CerrarModalBusqueda"></button>
+                </div>
+                <div class="modal-body">
+                    @if (relacionesBuscadas != null && relacionesBuscadas.Any())
+                    {
+                        <div class="mb-3">
+                            <strong>ID Responsable:</strong> @idBusquedaResponsable<br />
+                            <strong>Nombre Responsable:</strong> @responsablesDisponibles.FirstOrDefault(a => a.Id == idBusquedaResponsable)?.Nombre
+                        </div>
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>ID Indicador</th>
+                                    <th>Nombre Indicador</th>
+                                    <th>Fecha Asignación</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var rel in relacionesBuscadas)
+                                {
+                                    <tr>
+                                        <td>@rel.FkIdIndicador</td>
+                                        <td>@indicadoresDisponibles.FirstOrDefault(i => i.Id == rel.FkIdIndicador)?.Nombre</td>
+                                        <td>@rel.FechaAsignacion.ToString("yyyy-MM-dd")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning">No se encontraron relaciones para ese responsable.</div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
     private List<ResponsablesPorIndicador> responsables = new();
     private List<Actor> responsablesDisponibles = new();
@@ -131,6 +181,9 @@ else
     private bool mostrarAlerta = false;
     private bool esNuevo = true;
     private List <string> userRoles = new();
+    private string idBusquedaResponsable = string.Empty;
+    private bool mostrarModalBusqueda = false;
+    private List<ResponsablesPorIndicador> relacionesBuscadas = new();
 
     [Inject] private IRepository Repository { get; set; } = null!;
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
@@ -225,5 +278,24 @@ else
     private void Cancelar()
     {
         mostrarFormulario = false;
+    }
+
+    private async Task BuscarPorId()
+    {
+        mostrarModalBusqueda = false;
+        relacionesBuscadas.Clear();
+        if (string.IsNullOrWhiteSpace(idBusquedaResponsable))
+        {
+            mensajeAlerta = "Ingrese un ID de responsable válido";
+            mostrarAlerta = true;
+            return;
+        }
+        relacionesBuscadas = responsables.Where(r => r.FkIdResponsable == idBusquedaResponsable).ToList();
+        mostrarModalBusqueda = true;
+    }
+    private void CerrarModalBusqueda()
+    {
+        mostrarModalBusqueda = false;
+        relacionesBuscadas.Clear();
     }
 }

@@ -1,14 +1,50 @@
 ﻿@page "/Seccion"
 
 <h3 class="text-center mt-4">Gestión de Secciones</h3>
-<div class="d-flex justify-content-end mb-3">
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <input type="text" class="form-control d-inline-block w-auto me-2" placeholder="Buscar por ID" @bind="idBusqueda" />
+        <button class="btn btn-info" @onclick="BuscarPorId" disabled="@string.IsNullOrWhiteSpace(idBusqueda)"><i class="fas fa-search"></i> Buscar</button>
+    </div>
     @if (userRoles.Contains("admin"))
     {
-    <button class="btn btn-primary" @onclick="MostrarFormulario">
-        <i class="fas fa-plus"></i> Agregar Sección
-    </button>
+        <button class="btn btn-primary" @onclick="MostrarFormulario">
+            <i class="fas fa-plus"></i> Agregar Sección
+        </button>
     }
 </div>
+
+@if (mostrarModalBusqueda)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Detalle de la Sección</h5>
+                    <button type="button" class="btn-close" @onclick="CerrarModalBusqueda"></button>
+                </div>
+                <div class="modal-body">
+                    @if (seccionBusqueda != null)
+                    {
+                        <dl class="row">
+                            <dt class="col-sm-4">ID</dt>
+                            <dd class="col-sm-8">@seccionBusqueda.Id</dd>
+                            <dt class="col-sm-4">Nombre</dt>
+                            <dd class="col-sm-8">@seccionBusqueda.Nombre</dd>
+                        </dl>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning">No se encontró ninguna sección con ese ID.</div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="CerrarModalBusqueda">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 
 @if (mostrarAlerta)
 {
@@ -34,16 +70,16 @@ else
     <table class="table table-striped table-hover">
         <thead class="table-dark">
             <tr>
-                <th>#</th>
+                <th>ID</th>
                 <th>Nombre</th>
                 <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var (s, index) in secciones.Select((s, i) => (s, i + 1)))
+            @foreach (var s in secciones)
             {
                 <tr>
-                    <td>@index</td>
+                    <td>@s.Id</td>
                     <td>@s.Nombre</td>
                     <td>
                         @if (userRoles.Contains("admin")|| userRoles.Contains("Validador"))
@@ -106,7 +142,9 @@ else
     private string? mensajeAlerta;
     private bool mostrarAlerta = false;
     private List <string> userRoles = new();
-
+    private string idBusqueda = string.Empty;
+    private bool mostrarModalBusqueda = false;
+    private Seccion? seccionBusqueda;
 
     [Inject] private IRepository Repository { get; set; } = null!;
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
@@ -178,5 +216,23 @@ else
     private void Cancelar()
     {
         mostrarFormulario = false;
+    }
+
+    private void BuscarPorId()
+    {
+        mostrarModalBusqueda = false;
+        seccionBusqueda = null;
+        if (!string.IsNullOrWhiteSpace(idBusqueda))
+        {
+            seccionBusqueda = secciones.FirstOrDefault(s => s.Id == idBusqueda);
+        }
+        mostrarModalBusqueda = true;
+    }
+
+    private void CerrarModalBusqueda()
+    {
+        mostrarModalBusqueda = false;
+        seccionBusqueda = null;
+        idBusqueda = string.Empty;
     }
 }

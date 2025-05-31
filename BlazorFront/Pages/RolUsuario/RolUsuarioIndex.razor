@@ -1,14 +1,53 @@
 @page "/RolUsuario"
 
 <h3 class="text-center mt-4">Gestión de Rol de Usuario</h3>
-<div class="d-flex justify-content-end mb-3">
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <input type="text" class="form-control d-inline-block w-auto me-2" placeholder="Buscar por Email" @bind="emailBusqueda" />
+        <button class="btn btn-info" @onclick="BuscarPorEmail" disabled="@string.IsNullOrWhiteSpace(emailBusqueda)"><i class="fas fa-search"></i> Buscar</button>
+    </div>
     @if (userRoles.Contains("admin"))
     {
-    <button class="btn btn-primary" @onclick="MostrarFormulario">
-        <i class="fas fa-plus"></i> Agregar Rol de Usuario
-    </button>
+        <button class="btn btn-primary" @onclick="MostrarFormulario">
+            <i class="fas fa-plus"></i> Agregar Rol de Usuario
+        </button>
     }
 </div>
+
+@if (mostrarModalBusqueda)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Roles asociados al Email</h5>
+                    <button type="button" class="btn-close" @onclick="CerrarModalBusqueda"></button>
+                </div>
+                <div class="modal-body">
+                    @if (rolesUsuarioBusqueda != null && rolesUsuarioBusqueda.Any())
+                    {
+                        <ul class="list-group">
+                            @foreach (var ru in rolesUsuarioBusqueda)
+                            {
+                                var rol = rolesDisponibles.FirstOrDefault(r => r.Id == ru.FkIdRol);
+                                <li class="list-group-item">
+                                    <strong>Rol:</strong> @(rol != null ? $"{rol.Nombre} (ID: {rol.Id})" : ru.FkIdRol.ToString())
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning">No se encontró ningún registro con ese email.</div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="CerrarModalBusqueda">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 
 @if (mostrarAlerta)
 {
@@ -122,6 +161,7 @@ else
     private string? mensajeAlerta;
     private bool mostrarAlerta = false;
     private List <string> userRoles = new();
+    private List<RolUsuario> rolesUsuarioBusqueda = new();
 
 
     [Inject] private IRepository Repository { get; set; } = null!;
@@ -213,5 +253,28 @@ else
     private void Cancelar()
     {
         mostrarFormulario = false;
+    }
+
+    private string emailBusqueda = string.Empty;
+    private bool mostrarModalBusqueda = false;
+    private RolUsuario? rolUsuarioBusqueda;
+    private string NombreRolBusqueda = string.Empty;
+
+    private void BuscarPorEmail()
+    {
+        mostrarModalBusqueda = false;
+        rolesUsuarioBusqueda = new List<RolUsuario>();
+        if (!string.IsNullOrWhiteSpace(emailBusqueda))
+        {
+            rolesUsuarioBusqueda = rolesUsuarios.Where(ru => ru.FkEmail == emailBusqueda).ToList();
+        }
+        mostrarModalBusqueda = true;
+    }
+
+    private void CerrarModalBusqueda()
+    {
+        mostrarModalBusqueda = false;
+        rolesUsuarioBusqueda = new List<RolUsuario>();
+        emailBusqueda = string.Empty;
     }
 }
