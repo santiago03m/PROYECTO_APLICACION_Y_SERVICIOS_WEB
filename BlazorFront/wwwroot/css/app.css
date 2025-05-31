@@ -69,7 +69,9 @@ a, .btn-link {
         content: "An error has occurred."
     }
 
-.loading-progress {
+
+
+/* .loading-progress {
     position: relative;
     display: block;
     width: 8rem;
@@ -100,7 +102,7 @@ a, .btn-link {
 
     .loading-progress-text:after {
         content: var(--blazor-load-percentage-text, "Loading");
-    }
+    } */
 
 code {
     color: #c02d76;
@@ -113,4 +115,64 @@ code {
 
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
+}
+
+.custom-loader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background: #e0d2f8;
+}
+
+.loader-logo {
+    width: 192px;
+    margin-bottom: 1.5rem;
+}
+
+.loader-spinner {
+    border: 8px solid #000000;
+    border-top: 8px solid #7733c0;
+    border-radius: 50%;
+    width: 64px;
+    height: 64px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg);}
+    100% { transform: rotate(360deg);}
+}
+
+.loader-text {
+    font-size: 1.2rem;
+    color: #333;
+    font-weight: 500;
+}
+
+.loader-dots {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+.loader-dots div {
+    width: 16px;
+    height: 16px;
+    background: #58169e;
+    border-radius: 50%;
+    animation: loader-dots-bounce 0.8s infinite alternate;
+}
+.loader-dots div:nth-child(2) {
+    animation-delay: 0.2s;
+}
+.loader-dots div:nth-child(3) {
+    animation-delay: 0.4s;
+}
+@keyframes loader-dots-bounce {
+    to {
+        opacity: 0.3;
+        transform: translateY(-12px);
+    }
 }
