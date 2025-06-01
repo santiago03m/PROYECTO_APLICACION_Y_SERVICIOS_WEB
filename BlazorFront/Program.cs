@@ -14,7 +14,7 @@ public class Program
         var builder = WebAssemblyHostBuilder.CreateDefault(args);
         builder.RootComponents.Add<App>("#app");
         builder.RootComponents.Add<HeadOutlet>("head::after");
-        var url = "https://localhost:7123";
+        var url = "https://indicadores-asw.runasp.net/";
         builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(url) });
         builder.Services.AddAuthorizationCore();
         builder.Services.AddMudServices();

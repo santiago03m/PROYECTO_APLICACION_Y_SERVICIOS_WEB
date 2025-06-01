@@ -21,16 +21,15 @@ namespace CRUD.Backend
             builder.Services.AddSwaggerGen();
             builder.Services.AddCors(options =>
             {
-                options.AddPolicy("AllowSpecificOrigins", policy =>
+                options.AddPolicy("AllowAllOrigins", policy =>
                 {
-                    policy.WithOrigins("http://localhost:7250", "https://localhost:7250",
-                                       "http://localhost:5174", "https://localhost:7123")
+                    policy.AllowAnyOrigin()
                         .AllowAnyHeader()
                         .AllowAnyMethod();
                 });
             });
             builder.Services.AddDbContext<DataContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer")));
+                options.UseSqlServer(builder.Configuration.GetConnectionString("monster")));
 
 
             var key = builder.Configuration["Jwt:key"];
@@ -67,7 +66,7 @@ namespace CRUD.Backend
 
             app.UseHttpsRedirection();
 
-            app.UseCors("AllowSpecificOrigins");
+            app.UseCors("AllowAllOrigins");
 
             app.UseAuthentication();
 
